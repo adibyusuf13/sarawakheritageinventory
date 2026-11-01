@@ -1,0 +1,250 @@
+<script>
+'use strict';
+window.__P=(window.__P||0)+1;
+const A = {
+  um: () => { S.um = !S.um; render(); },
+  dsearch: () => { const v = ($('#ds_q').value || '').trim(); S.F = {}; if (v) S.F.q = v; go('inv'); },
+  adv: () => { S.F = {}; go('inv'); },
+  eye: () => { const i = $('#a_p'); i.type = i.type == 'password' ? 'text' : 'password'; },
+  hero: async () => { const f = $('#hf').files[0]; if (!f) return; const x = await rs(f); if (!x) return toast('JPG / PNG'); const r = await call('photo', { name: x.name, data: x.data }); if (!r.ok) return toast(r.e); const c = await call('saveContent', { lang: 'en', items: { hero_image: r.d.id } }); toast(c.ok ? t('saved') : c.e); await load(); render(); },
+  home: () => go('dash'),
+  menu: () => document.body.classList.toggle('nav'),
+  go: (d, b) => go(d.v, d.id || null),
+  to: d => {
+    S.tab = d.v;
+    S.U ? go('dash') : render();
+  },
+  lang: d => {
+    S.L = d.l;
+    try {
+      localStorage.setItem('lang', S.L);
+    } catch (e) {
+    }
+    render();
+  },
+  filt: d => {
+    S.F = {};
+    const [k, v] = d.f.split('=');
+    if (k)
+      S.F[k] = v;
+    go('inv');
+  },
+  vm: d => {
+    S.vm = d.m;
+    $('#res').innerHTML = res();
+  },
+  pg: d => {
+    S.pg = Math.max(0, S.pg + +d.d);
+    $('#res').innerHTML = res();
+    scrollTo(0, 0);
+  },
+  refresh: async () => {
+    await load();
+    render();
+    toast(t('saved'));
+  },
+  print: () => print(),
+  big: d => {
+    $('#big').src = img(d.id, 1200);
+  },
+  saveR,
+  exp: () => exp(),
+  exp0: () => exp(1),
+  imp,
+  rmK: (d, b) => {
+    if (two(b)) {
+      S.KEEP.splice(+d.n, 1);
+      pv();
+    }
+  },
+  rmN: (d, b) => {
+    if (two(b)) {
+      S.NP.splice(+d.n, 1);
+      pv();
+    }
+  },
+  del: async (d, b) => {
+    if (!two(b))
+      return;
+    const r = await call('del', { id: d.id });
+    if (r.ok) {
+      toast(t('deleted'));
+      await load();
+      go('inv');
+    } else
+      toast(r.e);
+  },
+  auth: async () => {
+    const su = S.tab == 'up', p = {
+        email: $('#a_e').value,
+        password: $('#a_p').value
+      };
+    p.login = p.email;
+    if (su) {
+      p.name = $('#a_n').value;
+      p.org = $('#a_o').value;
+      p.username = $('#a_u').value;
+    }
+    const r = await call(su ? 'signup' : 'login', p);
+    if (!r.ok)
+      return toast(r.e);
+    if (su) {
+      S.tab = 'in';
+      render();
+      return toast(t('submitted'));
+    }
+    S.TK = r.d.token;
+    S.U = r.d.user;
+    try {
+      sessionStorage.setItem('tk', S.TK);
+    } catch (e) {
+    }
+    await load();
+    go('dash');
+  },
+  logout: async () => {
+    await call('logout');
+    S.TK = S.U = null;
+    try {
+      sessionStorage.removeItem('tk');
+    } catch (e) {
+    }
+    S.DB = [];
+    await load();
+    go('dash');
+  },
+  cpw: async () => {
+    const n = $('#c_n').value;
+    if (n !== $('#c_n2').value)
+      return toast(t('pwmis'));
+    const r = await call('chpw', {
+      old: $('#c_o').value,
+      nw: n
+    });
+    if (!r.ok)
+      return toast(r.e);
+    [
+      '#c_o',
+      '#c_n',
+      '#c_n2'
+    ].forEach(k => $(k).value = '');
+    toast(t('pwdone'));
+  },
+  ut: d => {
+    S.ut = d.v;
+    render();
+  },
+  eu: d => {
+    S.EU = d.e || null;
+    drawUsers();
+  },
+  us: async d => {
+    const r = await call('updateUser', {
+      email: d.e,
+      name: $('#e_n').value,
+      username: $('#e_u').value,
+      organisation: $('#e_o').value,
+      role: $('#e_r').value,
+      status: $('#e_s').value,
+      password: $('#e_p').value
+    });
+    toast(r.ok ? t('saved') : r.e);
+    if (r.ok)
+      S.EU = null;
+    loadUsers();
+  },
+  ru: async (d, b) => {
+    if (!two(b))
+      return;
+    const r = await call('removeUser', { email: d.e });
+    toast(r.ok ? t('deleted') : r.e);
+    loadUsers();
+  },
+  dec: async d => {
+    const r = await call('decide', {
+      email: d.e,
+      approve: !!d.ok,
+      role: d.ok ? $('#pr_' + d.u).value : ''
+    });
+    toast(r.ok ? t('saved') : r.e);
+    loadUsers();
+  }
+};
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (b && A[b.dataset.a])
+    A[b.dataset.a](b.dataset, b);
+});
+document.addEventListener('input', e => {
+  const f = e.target.dataset;
+  if (f.f == 'q') {
+    S.F.q = e.target.value;
+    S.pg = 0;
+    $('#res').innerHTML = res();
+  }
+  if ('mp' in f)
+    mp();
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset.f;
+  if (k && k != 'q') {
+    S.F[k] = e.target.value;
+    S.pg = 0;
+    $('#res').innerHTML = res();
+  }
+  if (e.target.id == 'pf')
+    addP(e.target.files);
+});
+document.addEventListener('keydown', e => {
+  if (e.key == 'Enter' && e.target.dataset.enter)
+    A[e.target.dataset.enter]();
+  if (e.key == 'Escape')
+    document.body.classList.remove('nav');
+});
+async function addP(fs) {
+  for (const f of fs) {
+    const x = await rs(f);
+    if (x)
+      S.NP.push(x);
+    else
+      toast(f.name + ': JPG / PNG');
+  }
+  pv();
+  $('#pf').value = '';
+}
+matchMedia('(max-width:860px)').addEventListener('change', () => {
+  if (S.view == 'inv')
+    render();
+});
+(async () => {
+  if (typeof google === 'undefined' || !google.script || !google.script.run) {
+    window.__BOOTED = true;
+    $('#v').innerHTML = '<div style="max-width:560px;margin:60px auto;padding:24px;background:#fff;border:1px solid #DDD8CB;border-radius:8px;line-height:1.6"><h2 style="margin-top:0">Open the web app link</h2><p>This page only works when it is served by Google Apps Script. You are viewing a copy of the file, so it cannot reach your spreadsheet.</p><p>Open <b>https://tinyurl.com/sarawakheritageinventory</b> in Chrome or Safari, or the web app URL from Deploy \u2192 Manage deployments.</p><p style="color:#5B676D;font-size:13px">If you pasted the files into Apps Script, deploy a <b>New version</b> before opening the link.</p></div>';
+    return;
+  }
+  try {
+    $('#v').textContent = t('loading');
+    if (S.TK) {
+      const r = await call('me');
+      if (r.ok && r.d)
+        S.U = r.d;
+      else
+        S.TK = null;
+    }
+    $('#v').innerHTML = '<p style="padding:40px;text-align:center">' + esc(t('loading')) + ' (1/2)</p>';
+    setTimeout(() => { if (!S.booted) $('#v').innerHTML += '<p style="max-width:520px;margin:0 auto;padding:0 20px;text-align:center;color:#5B676D">Still connecting to Google. Open the link directly in Chrome or Safari, sign in to only one Google account, and allow cookies for script.google.com.</p>'; }, 12000);
+    const okL = await load();
+    if (!okL) {
+      $('#v').innerHTML = '<div style="max-width:560px;margin:60px auto;padding:24px;background:#fff;border:1px solid #DDD8CB;border-radius:8px"><h2 style="margin-top:0">Could not load the inventory</h2><pre style="white-space:pre-wrap;color:#8c2f2f">' + esc(S.LE) + '</pre><p>Check that Code.gs is the new version and that you deployed a New version. Run <b>setup</b> once from the Apps Script editor, then retry.</p><button class="btn" onclick="location.reload()">Retry</button></div>';
+      S.booted = true; window.__BOOTED = true;
+      return;
+    }
+    S.booted = true; window.__BOOTED = true;
+    render();
+  } catch (e) {
+    S.booted = true; window.__BOOTED = true;
+    $('#v').innerHTML = '<pre style="padding:20px;color:#8c2f2f;white-space:pre-wrap">Startup error: ' + esc(e.message) + '</pre>';
+  }
+})();
+(window.__D=window.__D||[]).push(6);
+</script>

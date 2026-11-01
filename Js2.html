@@ -1,0 +1,315 @@
+<script>
+'use strict';
+window.__P=(window.__P||0)+1;
+const ERR = {
+  'Please sign in': ['Sesi tamat. Sila log masuk semula.'],
+  'Administrator only': ['Hanya untuk pentadbir.'],
+  'Editor access required': ['Akses penyunting diperlukan.'],
+  'Invalid username/email or password': ['Nama pengguna/emel atau kata laluan tidak sah.'],
+  'Your application is awaiting administrator approval': ['Permohonan anda menunggu kelulusan pentadbir.'],
+  'Name is required': ['Nama diperlukan.'],
+  'Coordinates outside Sarawak': ['Koordinat di luar Sarawak.'],
+  'Current password is incorrect': ['Kata laluan semasa tidak betul.'],
+  'Password must be at least 8 characters': ['Kata laluan mesti sekurang-kurangnya 8 aksara.'],
+  'This username is already taken': ['Nama pengguna ini telah digunakan.'],
+  'Invalid email': ['Emel tidak sah.']
+};
+const V = [
+  'Gazetted',
+  'Director List',
+  'Not Listed',
+  'Building',
+  'Monument',
+  'Site',
+  'Underwater',
+  'Excellent',
+  'Good',
+  'Fair',
+  'Poor',
+  'Critical'
+];
+const OPT = {
+  type: [
+    'Building',
+    'Monument',
+    'Site',
+    'Underwater'
+  ],
+  gazette_status: [
+    'Not Listed',
+    'Director List',
+    'Gazetted'
+  ],
+  gazette_stage: [
+    '',
+    'Not Initiated',
+    'Under Assessment',
+    'Proposed',
+    'Gazetted',
+    'Deferred'
+  ],
+  condition: [
+    'Excellent',
+    'Good',
+    'Fair',
+    'Poor',
+    'Critical'
+  ]
+};
+const COLS = [
+  'id',
+  'ref_no',
+  'name',
+  'type',
+  'division',
+  'district',
+  'location',
+  'latitude',
+  'longitude',
+  'description',
+  'historical_significance',
+  'gazette_status',
+  'gazette_stage',
+  'gazette_no',
+  'gazette_date',
+  'ordinance',
+  'legal_reference',
+  'year_built',
+  'condition',
+  'local_authority',
+  'managed_by',
+  'owner',
+  'land_status',
+  'images'
+];
+const NAV = [
+  ['dash'],
+  ['inv'],
+  ['cats'],
+  ['gaz'],
+  ['map'],
+  ['recs'],
+  [
+    'users',
+    'admin'
+  ],
+  ['set']
+];
+const S = {
+  L: 'en',
+  U: null,
+  TK: null,
+  DB: [],
+  ST: {},
+  DIVS: [],
+  CT: {},
+  view: 'dash',
+  arg: null,
+  F: {},
+  pg: 0,
+  vm: 'table',
+  tab: 'in',
+  ut: 'acc',
+  UL: [],
+  AL: [],
+  NP: [],
+  KEEP: [],
+  MAP: null,
+  EU: null
+};
+try {
+  S.TK = sessionStorage.getItem('tk');
+  S.L = localStorage.getItem('lang') || 'en';
+} catch (e) {
+}
+const $ = s => document.querySelector(s), esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '\'': '&#39;'
+  }[c]));
+const t = k => S.CT[k] && S.CT[k][S.L] || T[S.L][k] || T.en[k] || k, tv = v => v ? V.includes(v) || v == 'ACTIVE' || v == 'DISABLED' || [
+    'Not Initiated',
+    'Under Assessment',
+    'Proposed',
+    'Deferred'
+  ].includes(v) ? t(v) : v : '\u2014';
+const isEd = () => S.U && [
+    'admin',
+    'editor'
+  ].includes(S.U.role), isAd = () => S.U && S.U.role == 'admin', mob = () => matchMedia('(max-width:860px)').matches;
+const fd = ms => ms ? new Date(+ms).toLocaleDateString(S.L == 'ms' ? 'ms-MY' : 'en-GB', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric'
+}) : '\u2014';
+const imgs = r => String(r.images || '').split('|').filter(Boolean), img = (id, w) => 'https://drive.google.com/thumbnail?id=' + id + '&sz=w' + w;
+const stage = r => r.gazette_stage || (r.gazette_status == 'Gazetted' ? 'Gazetted' : ''), chip = r => `<span class="chip ${ r.gazette_status == 'Gazetted' ? 'G' : r.gazette_status == 'Director List' ? 'D' : '' }">${ esc(tv(r.gazette_status)) }</span>`;
+const okLL = (a, b) => a >= 0.8 && a <= 5.1 && b >= 109.5 && b <= 115.9;
+function toast(m) {
+  const e = $('#toast');
+  e.textContent = m;
+  e.style.display = 'block';
+  clearTimeout(toast.h);
+  toast.h = setTimeout(() => e.style.display = 'none', 3800);
+}
+function call(a, p) {
+  return new Promise(res0 => {
+    let done = false;
+    const timer = setTimeout(() => { if (!done) { done = true; res0({ ok: 0, e: 'The server did not respond in time.' }); } }, 30000);
+    const res = x => { if (done) return; done = true; clearTimeout(timer); res0(x); };
+    const r = x => {
+      if (x && !x.ok) {
+        if (x.e == 'Please sign in' && S.U) {
+          S.U = S.TK = null;
+          S.DB = [];
+          load().then(() => go('dash'));
+        }
+        if (S.L == 'ms' && ERR[x.e])
+          x.e = ERR[x.e][0];
+      }
+      res(x);
+    };
+    google.script.run.withSuccessHandler(r).withFailureHandler(e => r({
+      ok: 0,
+      e: e.message
+    })).api(a, p || {}, S.TK);
+  });
+}
+async function load() {
+  const r = await call('list');
+  if (r.ok) {
+    S.CT = r.d.content || {};
+    S.DIVS = r.d.divs || [];
+    S.ST = r.d.stats || {};
+    S.DB = r.d.recs || [];
+  } else {
+    S.LE = r.e;
+    toast(r.e);
+  }
+  return !!r.ok;
+}
+function go(v, a) {
+  S.um = false;
+  S.view = v;
+  S.arg = a;
+  S.pg = 0;
+  document.body.classList.remove('nav');
+  scrollTo(0, 0);
+  render();
+  $('#v').focus({ preventScroll: true });
+}
+function render() {
+  document.body.classList.toggle('lg', !S.U);
+  document.body.classList.toggle('app', !!S.U);
+  if (S.MAP) {
+    S.MAP.remove();
+    S.MAP = null;
+  }
+  document.documentElement.lang = S.L == 'ms' ? 'ms' : 'en';
+  $('#bn').innerHTML = esc(t('brand')) + '<small>' + esc(t('dept')) + '</small>';
+  $('#ft').textContent = S.U ? '\u201C' + t('quote') + '\u201D' : '\xA9 ' + t('brand');
+  document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.l == S.L));
+  $('#me').innerHTML = S.U ? `<span class="av" aria-hidden="true">${ esc(S.U.name[0]) }</span><span class="tx"><b>${ esc(S.U.name) }</b><small>${ esc(t(S.U.role)) }</small></span><button class="btn alt sm" data-a="logout">${ t('logout') }</button>` : `<button class="btn sm" data-a="to" data-v="in">${ t('signin') }</button>`;
+  $('#ham').style.display = S.U ? '' : 'none';
+  $('#nav').style.display = S.U ? '' : 'none';
+  $('#nav').innerHTML = !S.U ? '' : '<div class="cs" aria-hidden="true"><span class="cr2"></span></div>' + NAV.filter(n => !n[1] || isAd()).map(([k]) => `<button data-a="go" data-v="${ k }" ${ S.view == k || S.view == 'rec' && k == 'inv' || S.view == 'form' && k == 'recs' ? 'aria-current="page"' : '' }><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ NI[k] }"/></svg>${ t(k == 'dash' ? 'home' : k) }</button>`).join('') + '<div class="ao" aria-hidden="true"></div>';
+  const m = S.U ? {
+    dash,
+    inv,
+    cats,
+    gaz,
+    map: mapV,
+    recs,
+    users,
+    set,
+    rec,
+    form
+  }[S.view] : pub;
+  const body = (m || dash)();
+  $('#v').innerHTML = S.U ? (S.view == 'dash' ? heroBar() : `<div class="sb"><span class="tt">${ esc(t('heroT')) }</span>${ ub() }</div>`) + '<div class="ct">' + body + '</div>' : body;
+  if (['dash', 'map'].includes(S.view) && S.U)
+    initMap();
+  if (S.view == 'form')
+    mp();
+  if (S.view == 'form')
+    pv();
+  if (S.view == 'users' && isAd())
+    loadUsers();
+}
+function stats() {
+  const s = S.ST, go_ = S.U;
+  const c = [
+    [
+      'total',
+      s.total,
+      '',
+      'main'
+    ],
+    [
+      'gazd',
+      s.gaz,
+      'gazette_status=Gazetted'
+    ],
+    [
+      'dl',
+      s.dl,
+      'gazette_status=Director List'
+    ],
+    [
+      'bld',
+      s.bld,
+      'type=Building'
+    ],
+    [
+      'mon',
+      s.mon,
+      'type=Monument'
+    ],
+    [
+      'site',
+      s.site,
+      'type=Site'
+    ],
+    [
+      'uw',
+      s.uw,
+      'type=Underwater'
+    ]
+  ];
+  return `<div class="stats">${ c.map(([k, n, f, m]) => {
+    const b = `<b>${ n || 0 }</b><span>${ t(k) }</span>`;
+    return go_ ? `<button class="st ${ m || '' }" data-a="filt" data-f="${ f }">${ b }</button>` : `<div class="st ${ m || '' }">${ b }</div>`;
+  }).join('') }</div>`;
+}
+function welcome() {
+  const h = S.CT.hero_image && (S.CT.hero_image.en || S.CT.hero_image.ms);
+  return `<section class="welcome" ${ h ? `style="background-image:url(${ img(h, 1400) })"` : '' }><h1>${ esc(t('welcome')) }</h1><p>${ esc(t('sub')) }</p></section>`;
+}
+const IC = {
+  u: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4 0-8 2-8 5v3h16v-3c0-3-4-5-8-5z"/></svg>',
+  l: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8h-1V6a5 5 0 00-10 0v2H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V10a2 2 0 00-2-2zM9 6a3 3 0 016 0v2H9V6z"/></svg>',
+  e: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5C7 5 2.7 8.1 1 12c1.7 3.9 6 7 11 7s9.3-3.1 11-7c-1.7-3.9-6-7-11-7zm0 11a4 4 0 110-8 4 4 0 010 8zm0-6a2 2 0 100 4 2 2 0 000-4z"/></svg>',
+  a: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 17l5-5-5-5v3H3v4h7v3zM19 3h-8v2h8v14h-8v2h8a2 2 0 002-2V5a2 2 0 00-2-2z"/></svg>'
+};
+function pub() {
+  const ms = S.L == 'ms', su = S.tab == 'up';
+  const D = (bm, en) => ms ? [bm, en] : [en, bm];
+  const bi = (bm, en, tag) => { const [x, y] = D(bm, en); return x + '<em>' + y + '</em>'; };
+  const ph = S.CT.hero_image && (S.CT.hero_image.en || S.CT.hero_image.ms);
+  const fld = (id, ic, bm, en, extra) => `<div class="fld">${ IC[ic] }<div><label for="${ id }">${ bi(bm, en) }</label><input id="${ id }" ${ extra || '' }></div>${ id == 'a_p' ? `<button class="eye" type="button" data-a="eye" aria-label="Show / hide password">${ IC.e }</button>` : '' }</div>`;
+  const form = su
+    ? fld('a_n', 'u', 'Nama Penuh', 'Full name', 'autocomplete="name"') + fld('a_o', 'u', 'Organisasi', 'Organisation') + fld('a_u', 'u', 'Nama Pengguna', 'Username', 'autocomplete="username"') + fld('a_e', 'u', 'Emel', 'Email', 'type="email" autocomplete="email"') + fld('a_p', 'l', 'Kata Laluan (min 8)', 'Password (min 8)', 'type="password" autocomplete="new-password" data-enter="auth"')
+    : fld('a_e', 'u', 'Nama Pengguna', 'Username', 'autocomplete="username"') + fld('a_p', 'l', 'Kata Laluan', 'Password', 'type="password" autocomplete="current-password" data-enter="auth"');
+  const btn = su ? D('MOHON AKSES', 'APPLY FOR ACCESS') : D('LOG MASUK', 'SIGN IN');
+  return `<div class="lgp ${ ph ? 'photo' : '' }" ${ ph ? `style="--bg:url(${ img(ph, 1800) })"` : '' }>
+<div class="lgl" role="group" aria-label="Language / Bahasa"><button data-a="lang" data-l="ms" aria-pressed="${ ms }">BM</button><button data-a="lang" data-l="en" aria-pressed="${ !ms }">EN</button></div>
+<section class="lgt"><h1>${ bi('Selamat Datang', 'Welcome') }</h1><div class="gd" aria-hidden="true"><i></i></div><p>${ bi('Sila log masuk untuk mengakses Inventori Warisan Sarawak.', 'Please sign in to access the Sarawak Heritage Inventory.') }</p></section>
+<section class="lc" aria-label="${ btn[0] }"><div class="gd" aria-hidden="true" style="margin:0 auto;max-width:200px"><i></i></div><h2>${ su ? bi('Mohon Akses', 'Apply for Access') : bi('Log Masuk', 'Sign In') }</h2>${ form }
+<button class="lbtn" data-a="auth">${ IC.a }<span>${ btn[0] }<em>${ btn[1] }</em></span></button>
+<div class="lf"><div class="gd" aria-hidden="true"><i></i></div>${ bi('Hanya untuk kakitangan yang dibenarkan', 'For authorised personnel only') }<button data-a="to" data-v="${ su ? 'in' : 'up' }">${ su ? D('Sudah ada akaun? Log masuk', 'Already have an account? Sign in')[0] : D('Mohon akses kakitangan', 'Apply for staff access')[0] }</button></div></section>
+<div class="lgb" aria-hidden="true"></div></div>`;
+}
+(window.__D=window.__D||[]).push(2);
+</script>

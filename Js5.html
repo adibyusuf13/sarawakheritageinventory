@@ -1,0 +1,122 @@
+<script>
+'use strict';
+window.__P=(window.__P||0)+1;
+function parseCSV(s) {
+  const R = [];
+  let r = [], f = '', Q = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (Q) {
+      if (c == '"') {
+        if (s[i + 1] == '"') {
+          f += '"';
+          i++;
+        } else
+          Q = 0;
+      } else
+        f += c;
+    } else if (c == '"')
+      Q = 1;
+    else if (c == ',') {
+      r.push(f);
+      f = '';
+    } else if (c == '\n' || c == '\r') {
+      if (c == '\r' && s[i + 1] == '\n')
+        i++;
+      r.push(f);
+      f = '';
+      R.push(r);
+      r = [];
+    } else
+      f += c;
+  }
+  if (f || r.length) {
+    r.push(f);
+    R.push(r);
+  }
+  const h = R.shift().map(x => x.trim().replace(/^\uFEFF/, ''));
+  return R.filter(x => x.length > 1).map(x => Object.fromEntries(h.map((k, i) => [
+    k,
+    x[i]
+  ])));
+}
+function exp(blank) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF' + [COLS.map(q).join(',')].concat(blank ? [] : S.DB.map(r => COLS.map(k => q(r[k])).join(','))).join('\r\n')], { type: 'text/csv' }));
+  a.download = blank ? 'heritage-template.csv' : 'heritage-export.csv';
+  a.click();
+  if (!blank)
+    call('logExport', {
+      what: 'csv',
+      count: S.DB.length
+    });
+}
+function recs() {
+  return `<h1>${ t('recs') }</h1><div class="two"><div class="card"><h2>${ t('rep') }</h2><div class="div"></div><p><button class="btn" data-a="exp">${ t('exp') } (${ S.DB.length })</button></p><p><button class="btn alt" data-a="print">${ t('print') }</button></p>${ isEd() ? `<p><button class="btn alt" data-a="exp0">${ t('tpl') }</button></p>` : '' }</div>
+ ${ isEd() ? `<div class="card"><h2>${ t('add') }</h2><div class="div"></div><p><button class="btn" data-a="go" data-v="form">+ ${ t('add') }</button></p><h2>${ t('imp') }</h2><p class="nt">${ t('impH') }</p><input type="file" id="cf" accept=".csv" aria-label="${ esc(t('imp')) }"><p><button class="btn alt" data-a="imp">${ t('imp') }</button></p><pre id="ir" style="white-space:pre-wrap;font-size:12px"></pre></div>` : '' }</div>
+ <div class="pr"><h2>${ t('brand') } \u2013 ${ t('rep') } (${ new Date().toLocaleDateString() })</h2><table><tr><th>${ t('ref_no') }</th><th>${ t('name') }</th><th>${ t('type') }</th><th>${ t('division') }</th><th>${ t('gazette_status') }</th><th>${ t('updated') }</th></tr>${ S.DB.map(r => `<tr><td>${ esc(r.ref_no) }</td><td>${ esc(r.name) }</td><td>${ esc(tv(r.type)) }</td><td>${ esc(r.division) }</td><td>${ esc(tv(r.gazette_status)) }</td><td>${ fd(r.updated_at) }</td></tr>`).join('') }</table></div>`;
+}
+async function imp() {
+  const f = $('#cf').files[0];
+  if (!f)
+    return;
+  const rows = parseCSV(await f.text()), o = $('#ir');
+  let ok = 0, er = [];
+  for (let i = 0; i < rows.length; i += 60) {
+    o.textContent = i + '/' + rows.length + '\u2026';
+    const r = await call('import', { rows: rows.slice(i, i + 60) });
+    if (!r.ok) {
+      er.push(r.e);
+      break;
+    }
+    ok += r.d.saved;
+    er = er.concat(r.d.errors);
+  }
+  o.textContent = '\u2714 ' + ok + '/' + rows.length + '\n' + er.join('\n');
+  await load();
+}
+function users() {
+  return `<h1>${ t('users') }</h1><div class="tabs" role="tablist"><button role="tab" aria-selected="${ S.ut == 'acc' }" data-a="ut" data-v="acc">${ t('accounts') }</button><button role="tab" aria-selected="${ S.ut == 'log' }" data-a="ut" data-v="log">${ t('activity') }</button></div><div id="adm">${ t('loading') }</div>`;
+}
+async function loadUsers() {
+  const r = await call(S.ut == 'log' ? 'activity' : 'users');
+  if (!r.ok || !$('#adm'))
+    return;
+  if (S.ut == 'log')
+    S.AL = r.d;
+  else
+    S.UL = r.d;
+  drawUsers();
+}
+function roleSel(id, v, lim) {
+  return `<select id="${ id }" aria-label="${ t('role') }">${ [
+    'viewer',
+    'editor'
+  ].concat(lim ? [] : ['admin']).map(o => `<option value="${ o }" ${ v == o ? 'selected' : '' }>${ t(o) }</option>`).join('') }</select>`;
+}
+function drawUsers() {
+  if (S.ut == 'log') {
+    $('#adm').innerHTML = `<div class="tw"><table><thead><tr><th scope="col">${ t('when') }</th><th scope="col">${ t('who') }</th><th scope="col">${ t('act') }</th><th scope="col">${ t('target') }</th><th scope="col">${ t('detail') }</th></tr></thead><tbody>${ S.AL.map(x => `<tr><td>${ new Date(+x.ts).toLocaleString() }</td><td>${ esc(x.name || x.email) }</td><td>${ esc(x.action) }</td><td>${ esc(x.target) }</td><td>${ esc(x.detail) }</td></tr>`).join('') }</tbody></table></div>`;
+    return;
+  }
+  const p = S.UL.filter(x => x.status == 'PENDING'), ac = S.UL.filter(x => x.status != 'PENDING');
+  $('#adm').innerHTML = `<div class="card"><h2>${ t('pending') }</h2>${ p.map(x => `<div class="row" style="align-items:center;border-top:1px solid var(--line);padding:8px 0"><div>${ esc(x.name) }<br><small class="nt">@${ esc(x.username) } \u00b7 ${ esc(x.email) } \u00b7 ${ esc(x.organisation) }</small></div>${ roleSel('pr_' + esc(x.username), 'viewer', 1) }<span style="flex:0;white-space:nowrap"><button class="btn sm" data-a="dec" data-e="${ esc(x.email) }" data-u="${ esc(x.username) }" data-ok="1">${ t('approve') }</button> <button class="btn danger sm" data-a="dec" data-e="${ esc(x.email) }">${ t('reject') }</button></span></div>`).join('') || '\u2014' }</div>
+ <div class="tw"><table><thead><tr><th scope="col">${ t('name') }</th><th scope="col">${ t('org') }</th><th scope="col">${ t('role') }</th><th scope="col">${ t('status') }</th><th></th></tr></thead><tbody>${ ac.map((x, n) => x.email == S.EU ? `<tr><td colspan="5"><div class="row"><div><label>${ t('fullname') }</label><input id="e_n" value="${ esc(x.name) }"></div><div><label>${ t('user') }</label><input id="e_u" value="${ esc(x.username) }"></div><div><label>${ t('org') }</label><input id="e_o" value="${ esc(x.organisation) }"></div><div><label>${ t('role') }</label>${ roleSel('e_r', x.role) }</div><div><label>${ t('status') }</label><select id="e_s">${ [
+    'ACTIVE',
+    'DISABLED'
+  ].map(o => `<option value="${ o }" ${ x.status == o ? 'selected' : '' }>${ t(o) }</option>`).join('') }</select></div><div><label>${ t('newpw') }</label><input id="e_p" type="password"></div></div><p><button class="btn sm" data-a="us" data-e="${ esc(x.email) }">${ t('save') }</button> <button class="btn alt sm" data-a="eu" data-e="">${ t('cancel') }</button></p></td></tr>` : `<tr><td>${ esc(x.name) }<br><small class="nt">@${ esc(x.username) } \u00b7 ${ esc(x.email) }</small></td><td>${ esc(x.organisation) }</td><td>${ esc(t(x.role)) }</td><td><span class="chip ${ x.status == 'ACTIVE' ? '' : 'bad' }">${ esc(tv(x.status)) }</span></td><td style="text-align:right;white-space:nowrap">${ x.email == S.U.email ? '' : `<button class="btn alt sm" data-a="eu" data-e="${ esc(x.email) }">${ t('edit') }</button> <button class="btn danger sm" data-a="ru" data-e="${ esc(x.email) }">${ t('del') }</button>` }</td></tr>`).join('') }</tbody></table></div>`;
+}
+function set() {
+  const hero = isAd();
+  return `<h1>${ t('set') }</h1><div class="two"><div class="card"><h2>${ esc(S.U.name) }</h2><p>@${ esc(S.U.username || '') } \u00b7 ${ esc(S.U.email) } \u00b7 ${ esc(t(S.U.role)) }</p><p class="nt">${ t('roleNote') }</p><h3>${ t('language') }</h3><div class="seg" role="group"><button data-a="lang" data-l="en" aria-pressed="${ S.L == 'en' }">EN</button><button data-a="lang" data-l="ms" aria-pressed="${ S.L == 'ms' }">BM</button></div></div>
+ <div class="card"><h2>${ t('chpw') }</h2><label for="c_o">${ t('curpw') }</label><input type="password" id="c_o" autocomplete="current-password"><label for="c_n">${ t('newpw') }</label><input type="password" id="c_n" autocomplete="new-password"><label for="c_n2">${ t('newpw2') }</label><input type="password" id="c_n2" autocomplete="new-password"><p><button class="btn" data-a="cpw">${ t('chpw') }</button></p></div></div>${ isAd() ? `<div class="card"><h2>${ t('heroPhoto') }</h2><input type="file" id="hf" accept="image/*" aria-label="${ t('heroPhoto') }"><p><button class="btn" data-a="hero">${ t('save') }</button></p></div>` : '' }`;
+}
+const two = b => {
+  if (b.dataset.c)
+    return true;
+  b.dataset.c = 1;
+  b.textContent = t('sure');
+  return false;
+};
+(window.__D=window.__D||[]).push(5);
+</script>
