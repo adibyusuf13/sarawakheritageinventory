@@ -18,7 +18,8 @@
 /* One address. The landing page shows first, in the browser and in the installed app. Sign in opens the app inside this same window (no new browser). ?app opens it straight away; ?direct opens the Apps Script page itself. */
 (function(){var q=location.search;
  if(/[?&]direct\b/.test(q)){location.replace('https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec');return}
- if(/[?&]app\b/.test(q))document.documentElement.className='app'})();
+ if(/[?&]app\b/.test(q))document.documentElement.className='app';
+ try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true)document.documentElement.setAttribute('data-inst','1')}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet">
@@ -75,10 +76,35 @@ html.app .land{display:none}
 #splash,#app{display:none}
 html.app #app{display:block;position:fixed;top:env(safe-area-inset-top,0px);right:0;bottom:0;left:0;width:100%;height:calc(100% - env(safe-area-inset-top,0px));border:0;background:#F4F2EC}
 html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#0E3B36;color:#F4E7C5;font:600 16px system-ui,-apple-system,'Segoe UI',sans-serif;text-align:center;padding:24px;transition:opacity .4s;z-index:2}
-#splash img{width:140px;height:140px;border-radius:30px;box-shadow:0 10px 30px #0008}
+#splash img{width:120px;height:120px;border-radius:27px;box-shadow:0 10px 30px #0008}
+#splash h2{margin:0;font:700 20px/1.25 var(--serif);color:#F4E7C5}
+#splash #msg{font:600 16px/1.4 var(--sans);color:#F4E7C5;max-width:300px}
+#splash #sub{display:none;font:400 14px/1.5 var(--sans);color:#B9D0CD;max-width:300px;margin:0}
+#splash.slow #sub,#splash.off #sub{display:block}
+#trk{width:160px;height:4px;border-radius:2px;background:#2C5F59;overflow:hidden}
+#trk i{display:block;height:100%;width:8%;background:#C9A24A;border-radius:2px;animation:trk 10s cubic-bezier(.2,.7,.3,1) forwards}
+#splash.gone #trk i{animation:none;width:100%}
+#splash.slow #trk,#splash.off #trk{display:none}
+@keyframes trk{to{width:90%}}
+@media(prefers-reduced-motion:reduce){#trk i{animation:none;width:60%}}
+#acts{display:none;flex-direction:column;gap:12px;width:100%;max-width:300px}
+#splash.slow #acts,#splash.off #acts{display:flex}
+#acts .sb{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:10px;font:600 16px var(--sans);text-decoration:none;border:2px solid #C9A24A;background:#C9A24A;color:#10302C;cursor:pointer}
+#acts .sb.g{background:none;border-color:#F4E7C5;color:#F4E7C5}
+#splash.off #acts .sb.g{display:none}
+#splash button.sb:focus-visible,#acts a:focus-visible{outline:3px solid #fff;outline-offset:3px}
+html[data-inst] .inst{display:none}
+#sel{font-weight:600;color:var(--ink)}
+.t{cursor:pointer}.t.on{background:#C9A24A;color:#0E2E2C}
+@media(max-width:640px){
+ .land .bar{padding-top:max(18px,env(safe-area-inset-top))}
+ h1{font-size:34px;line-height:1.1;max-width:none}
+ .cta{flex-direction:column;align-items:stretch;gap:12px}.cta .btn{min-height:52px;justify-content:center}
+ .t{font-size:0;padding:0}
+ .t.on{outline:3px solid var(--ink);outline-offset:1px}
+}
+html.app #splash{gap:16px}
 #splash.gone{opacity:0;pointer-events:none}
-#open{display:none;padding:12px 20px;border-radius:10px;background:#C9A24A;color:#10302C;text-decoration:none;font-weight:700}
-#splash.slow #open{display:inline-block}
 .inst{margin:18px 0 0;font-size:15px;color:var(--mute)}
 </style>
 </head>
@@ -107,7 +133,7 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
  </div>
  <div class="map">
   <div class="grid" id="grid" role="list" aria-label="Sarawak divisions"></div>
-  <p class="cap"><span data-en>The thirteen divisions of Sarawak, placed roughly as they sit on the map. Every record belongs to one.</span><span data-ms>Tiga belas bahagian Sarawak, disusun menghampiri kedudukannya pada peta. Setiap rekod dimiliki satu bahagian.</span></p>
+  <p class="cap"><span data-en>The thirteen divisions of Sarawak, placed roughly as they sit on the map. Every record belongs to one. Tap a tile to see its name.</span><span data-ms>Tiga belas bahagian Sarawak, disusun menghampiri kedudukannya pada peta. Setiap rekod dimiliki satu bahagian. Ketik jubin untuk melihat namanya.</span> <span id="sel" aria-live="polite"></span></p>
  </div>
 </div>
 </main>
@@ -151,7 +177,7 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
 <footer><div class="w"><span data-en>For authorised personnel only.</span><span data-ms>Untuk kakitangan yang diberi kuasa sahaja.</span><span>Sarawak Heritage Inventory</span></div></footer>
 
 </div>
-<div id="splash" role="status"><img src="apple-touch-icon.png" alt=""><div>Sarawak Heritage Inventory</div><div id="msg">Loading…</div><a id="open" target="_top">Open the app</a></div>
+<div id="splash" role="status" aria-live="polite"><img src="apple-touch-icon.png" alt=""><h2>Sarawak Heritage Inventory</h2><div id="trk" aria-hidden="true"><i></i></div><div id="msg"></div><p id="sub"></p><div id="acts"><button type="button" class="sb" id="retry"></button><a class="sb g" id="open" target="_top"></a></div></div>
 <iframe id="app" title="Sarawak Heritage Inventory" allow="clipboard-write; fullscreen; geolocation"></iframe>
 <script>
 (function(){
@@ -160,6 +186,10 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
  var g=document.getElementById('grid');
  D.forEach(function(d,i){var b=document.createElement('div');b.className='t';b.setAttribute('role','listitem');b.tabIndex=0;b.textContent=d[0];
   b.style.gridColumn=d[1]+1;b.style.gridRow=d[2]+1;b.style.animationDelay=(i*70)+'ms';g.appendChild(b);});
+ var sel=document.getElementById('sel');
+ function pick(t){document.querySelectorAll('.t.on').forEach(function(x){x.classList.remove('on')});t.classList.add('on');sel.textContent=t.textContent+'.'}
+ g.addEventListener('click',function(e){var t=e.target.closest('.t');if(t)pick(t)});
+ g.addEventListener('keydown',function(e){if((e.key=='Enter'||e.key==' ')&&e.target.classList.contains('t')){e.preventDefault();pick(e.target)}});
  var bs=document.querySelectorAll('.lang button');
  function set(l){document.documentElement.lang=l;bs.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.l==l?'true':'false')});try{localStorage.setItem('shi_land',l)}catch(e){}}
  bs.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.l)})});
@@ -182,18 +212,47 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
     }
     try { e.source.postMessage({ shiDev: v }, e.origin); } catch (x) {}
   });
+  var TXT = {
+    en: { load: 'Opening the inventory…', slow: 'Still loading.', slowSub: 'This can take a moment on a slow connection. You can keep waiting, try again, or open the app in your browser.', off: 'You are offline.', offSub: 'Connect to Wi-Fi or mobile data, then try again.', retry: 'Try again', browser: 'Open in browser' },
+    ms: { load: 'Membuka inventori…', slow: 'Masih memuatkan.', slowSub: 'Ini mungkin mengambil sedikit masa jika sambungan perlahan. Anda boleh terus menunggu, cuba lagi, atau buka aplikasi dalam pelayar.', off: 'Anda di luar talian.', offSub: 'Sambung ke Wi-Fi atau data mudah alih, kemudian cuba lagi.', retry: 'Cuba lagi', browser: 'Buka dalam pelayar' }
+  };
+  var splash = document.getElementById('splash'), frame = document.getElementById('app'), msg = document.getElementById('msg'), sub = document.getElementById('sub'), retry = document.getElementById('retry'), openA = document.getElementById('open'), slowT = 0, loaded = false;
+  function tx() { return TXT[document.documentElement.lang == 'ms' ? 'ms' : 'en']; }
+  function state(k) {
+    var T = tx();
+    splash.classList.remove('slow', 'off');
+    if (k == 'slow') { splash.classList.add('slow'); msg.textContent = T.slow; sub.textContent = T.slowSub; }
+    else if (k == 'off') { splash.classList.add('off'); msg.textContent = T.off; sub.textContent = T.offSub; }
+    else msg.textContent = T.load;
+    retry.textContent = T.retry; openA.textContent = T.browser;
+  }
+  function load() {
+    loaded = false; splash.classList.remove('gone');
+    var i = document.querySelector('#trk i'); i.style.animation = 'none'; void i.offsetWidth; i.style.animation = '';
+    clearTimeout(slowT);
+    if (navigator.onLine === false) { state('off'); return; }
+    state('load');
+    // First load sets src; a retry replaces the frame's address so it adds no history entries (Back keeps working).
+    if (!frame.getAttribute('src')) frame.src = APP;
+    else { try { frame.contentWindow.location.replace(APP); } catch (x) { frame.src = APP; } }
+    slowT = setTimeout(function () { if (!loaded) state('slow'); }, 12000);
+  }
+  frame.addEventListener('load', function () {
+    loaded = true; clearTimeout(slowT); splash.classList.remove('slow', 'off'); splash.classList.add('gone');
+  });
+  retry.addEventListener('click', load);
+  window.addEventListener('online', function () { if (document.documentElement.className == 'app' && !loaded) load(); });
+  window.addEventListener('offline', function () { if (document.documentElement.className == 'app' && !loaded) { clearTimeout(slowT); state('off'); } });
+  openA.href = APP;
   function startApp(push) {
-    var open = document.getElementById('open'), splash = document.getElementById('splash'), frame = document.getElementById('app');
     document.documentElement.className = 'app';
     if (push) { try { history.pushState({ app: 1 }, '', '?app'); } catch (x) {} }
-    if (frame.getAttribute('src')) return;
-    open.href = APP;
-    frame.addEventListener('load', function () { splash.classList.add('gone'); });
-    frame.src = APP;
-    setTimeout(function () {
-      if (!splash.classList.contains('gone')) { splash.classList.add('slow'); document.getElementById('msg').textContent = 'Taking longer than usual.'; }
-    }, 12000);
+    if (!frame.getAttribute('src')) load();
   }
+  // Back (browser or iPhone swipe) returns to the landing page; the app stays loaded and signed in.
+  window.addEventListener('popstate', function () {
+    document.documentElement.className = /[?&]app\b/.test(location.search) ? 'app' : '';
+  });
   // Sign in / Apply for access: stay in this window (full screen) instead of opening a new browser.
   document.addEventListener('click', function (e) {
     var a = e.target.closest && e.target.closest('a[data-go]');
