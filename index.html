@@ -15,10 +15,10 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="manifest" href="manifest.webmanifest">
 <script>
-/* One address, two modes. Installed app (home screen), ?app and ?direct open the app; a normal browser visit shows the landing page. */
-(function(){var q=location.search,st=false;try{st=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){}
+/* One address. The landing page shows first, in the browser and in the installed app. Sign in opens the app inside this same window (no new browser). ?app opens it straight away; ?direct opens the Apps Script page itself. */
+(function(){var q=location.search;
  if(/[?&]direct\b/.test(q)){location.replace('https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec');return}
- if(st||/[?&]app\b/.test(q))document.documentElement.className='app'})();
+ if(/[?&]app\b/.test(q))document.documentElement.className='app'})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet">
@@ -100,8 +100,8 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
   <h1><span data-en>The working record of Sarawak’s built heritage.</span><span data-ms>Rekod kerja warisan binaan Sarawak.</span></h1>
   <p class="lede"><span data-en>One place for gazetted sites, Director’s List entries, potential sites and antiquities. Staff keep each record, its photographs and its location up to date, from the office or from the field.</span><span data-ms>Satu tempat untuk tapak diwartakan, penyenaraian Senarai Pengarah, tapak berpotensi dan antikuiti. Kakitangan mengemas kini setiap rekod, gambar dan lokasinya, sama ada dari pejabat atau di lapangan.</span></p>
   <div class="cta">
-   <a class="btn" href="./?app"><span data-en>Sign in</span><span data-ms>Log masuk</span></a>
-   <a class="btn alt" href="./?app"><span data-en>Apply for access</span><span data-ms>Mohon akses</span></a>
+   <a class="btn" href="./?app" data-go><span data-en>Sign in</span><span data-ms>Log masuk</span></a>
+   <a class="btn alt" href="./?app" data-go><span data-en>Apply for access</span><span data-ms>Mohon akses</span></a>
   </div>
   <p class="note"><span data-en>For authorised personnel only. Access requests are approved by an administrator.</span><span data-ms>Untuk kakitangan yang diberi kuasa sahaja. Permohonan akses diluluskan oleh pentadbir.</span></p>
  </div>
@@ -145,7 +145,7 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
 <section id="access"><div class="w access">
  <div><h2><span data-en>Request access</span><span data-ms>Mohon akses</span></h2>
  <p class="sub" style="margin:0"><span data-en>Submit your name, designation and department. An administrator reviews each request. Passwords need at least 12 characters and are stored as salted hashes, never as plain text.</span><span data-ms>Hantar nama, jawatan dan jabatan anda. Pentadbir menyemak setiap permohonan. Kata laluan memerlukan sekurang-kurangnya 12 aksara dan disimpan sebagai cincang bergaram, tidak sekali-kali sebagai teks biasa.</span></p></div>
- <a class="btn" href="./?app"><span data-en>Apply for access</span><span data-ms>Mohon akses</span></a>
+ <a class="btn" href="./?app" data-go><span data-en>Apply for access</span><span data-ms>Mohon akses</span></a>
 </div></section>
 
 <footer><div class="w"><span data-en>For authorised personnel only.</span><span data-ms>Untuk kakitangan yang diberi kuasa sahaja.</span><span>Sarawak Heritage Inventory</span></div></footer>
@@ -182,8 +182,11 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
     }
     try { e.source.postMessage({ shiDev: v }, e.origin); } catch (x) {}
   });
-  if (document.documentElement.className == 'app') {
+  function startApp(push) {
     var open = document.getElementById('open'), splash = document.getElementById('splash'), frame = document.getElementById('app');
+    document.documentElement.className = 'app';
+    if (push) { try { history.pushState({ app: 1 }, '', '?app'); } catch (x) {} }
+    if (frame.getAttribute('src')) return;
     open.href = APP;
     frame.addEventListener('load', function () { splash.classList.add('gone'); });
     frame.src = APP;
@@ -191,6 +194,14 @@ html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align
       if (!splash.classList.contains('gone')) { splash.classList.add('slow'); document.getElementById('msg').textContent = 'Taking longer than usual.'; }
     }, 12000);
   }
+  // Sign in / Apply for access: stay in this window (full screen) instead of opening a new browser.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[data-go]');
+    if (!a) return;
+    e.preventDefault();
+    startApp(true);
+  });
+  if (document.documentElement.className == 'app') startApp(false);
 </script>
 </body>
 </html>
