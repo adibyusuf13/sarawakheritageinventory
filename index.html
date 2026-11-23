@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="app">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sarawak Heritage Inventory</title>
-<meta name="description" content="The working record of Sarawak's gazetted and listed heritage sites and antiquities. For authorised heritage staff.">
-<meta name="theme-color" content="#1B7774">
+<meta name="description" content="Sarawak Heritage Inventory. For authorised heritage staff.">
+<meta name="theme-color" content="#0F3B36">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="SK Heritage">
@@ -15,232 +15,94 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="manifest" href="manifest.webmanifest">
 <script>
-/* One address. Landing page first (browser and installed app). Sign in opens the app in this same window. ?app skips the landing page; ?direct opens the Apps Script page itself. */
-(function(){var q=location.search,d=document.documentElement;
- if(/[?&]direct\b/.test(q)){location.replace('https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec');return}
- if(/[?&]app\b/.test(q))d.className='app';
- try{var s=localStorage.getItem('shi_th');d.setAttribute('data-theme',s||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'))}catch(e){d.setAttribute('data-theme','light')}
- try{if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true)d.setAttribute('data-inst','1')}catch(e){}})();
+/* Launcher only: this page shows the splash screen and opens the app full screen in the same window. ?direct opens the Apps Script page itself. */
+(function(){if(/[?&]direct\b/.test(location.search))location.replace('https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec')})();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#1B7774;--hi:rgba(72,170,165,.55);--lo:rgba(7,52,50,.55);--tx:#FFFFFF;--mu:#E8F6F4;--b1:#1F8A85;--b2:#0F4F4C;--bd:#FFE7A8;--ring:#FFE7A8;--glow:rgba(6,44,42,.45);
---serif:'Source Serif 4',Georgia,'Times New Roman',serif;--sans:Inter,system-ui,-apple-system,'Segoe UI',sans-serif;
---raise:10px 10px 24px var(--lo),-10px -10px 24px var(--hi);--raise-s:6px 6px 14px var(--lo),-6px -6px 14px var(--hi);--press:inset 5px 5px 10px var(--lo),inset -5px -5px 10px var(--hi)}
-html[data-theme=dark]{--bg:#134746;--hi:rgba(31,105,102,.7);--lo:rgba(3,26,25,.85);--tx:#EAF6F4;--mu:#B5D6D2;--b1:#1B7C77;--b2:#0A3231;--bd:#FFE7A8;--ring:#FFE7A8;--glow:rgba(2,20,19,.6);color-scheme:dark}
-*{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--tx);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;transition:background .3s}
-a{color:var(--bd)}a:focus-visible,button:focus-visible,input:focus-visible,.t:focus-visible{outline:3px solid var(--ring);outline-offset:3px;border-radius:12px}
-.w{max-width:1080px;margin:0 auto;padding:0 24px}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 0}
-.brand{font:700 18px/1.2 var(--serif);color:var(--tx);text-decoration:none}
-.ctl{display:flex;align-items:center;gap:14px}
-.lang{display:inline-flex;border-radius:14px;box-shadow:var(--press);padding:3px}.lang button{border:0;background:none;padding:6px 12px;font:600 13px var(--sans);color:var(--mu);cursor:pointer;min-height:34px;border-radius:11px}.lang button[aria-pressed=true]{color:var(--tx);box-shadow:var(--raise-s);background:var(--bg)}
-.rb{width:42px;height:42px;border-radius:50%;border:0;background:var(--bg);box-shadow:var(--raise-s);color:var(--bd);display:inline-grid;place-items:center;cursor:pointer;padding:0;transition:box-shadow .15s}.rb:active{box-shadow:var(--press)}.rb svg{width:20px;height:20px}
-html[data-theme=dark] .moon{display:none}html:not([data-theme=dark]) .sun{display:none}
-/* card */
-.stage{display:grid;place-items:center;padding:28px 0 72px}
-.scene{perspective:1500px;width:min(420px,100%)}
-.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--bg);border-radius:36px;box-shadow:var(--raise);padding:40px 36px 32px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;min-height:0}
-.badge{width:84px;height:84px;border-radius:50%;box-shadow:var(--raise-s);display:grid;place-items:center;color:var(--bd)}.badge svg{width:34px;height:34px}
-.face h2{font:700 30px/1.15 var(--serif);margin:4px 0 0;letter-spacing:-.01em}
-.sub{margin:0;color:var(--mu);font-size:14.5px;line-height:1.5;max-width:300px}
-.hint{margin:0;font-size:12.5px;color:var(--mu);max-width:300px}
-.go{width:100%;min-height:58px;border:0;border-radius:18px;background:linear-gradient(180deg,var(--b1),var(--b2));color:#fff;font:600 17px var(--sans);letter-spacing:.01em;cursor:pointer;box-shadow:0 8px 18px var(--glow),inset 0 1px 0 rgba(255,255,255,.22);transition:box-shadow .12s}
-.go:active{box-shadow:inset 0 3px 8px var(--glow)}
-.door{min-height:0;gap:14px}.or{margin-top:6px;font-size:13.5px;color:var(--mu)}.alt{width:100%;min-height:52px;border:0;border-radius:18px;background:var(--bg);box-shadow:var(--raise-s);color:var(--tx);font:600 15px var(--sans);cursor:pointer;transition:box-shadow .12s}.alt:active{box-shadow:var(--press)}.door .hint{margin-top:6px}
-.note{margin:22px auto 0;text-align:center;font-size:13.5px;color:var(--mu);max-width:420px}
-
-/* hero + 3D */
-.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(320px,420px);gap:56px;align-items:center;padding:24px 0 24px}
-.copy h1{font:700 clamp(36px,5vw,58px)/1.05 var(--serif);letter-spacing:-.02em;margin:0 0 20px;max-width:16ch}
-.copy .lede{font-size:18px;line-height:1.6;color:var(--mu);max-width:32em;margin:0}
-.hero .stage{padding:8px 0 40px}
-.scene{perspective:1600px;perspective-origin:50% 40%}
-.tilt{transform-style:preserve-3d;-webkit-transform-style:preserve-3d;transform:rotateX(4deg) rotateY(-9deg)}
-.face{box-shadow:var(--raise),0 40px 50px -30px var(--glow)}
-@media(max-width:900px){.hero{grid-template-columns:1fr;gap:20px}.copy h1{max-width:none}.tilt{transform:rotateX(2deg) rotateY(-3deg)}}
-@media(prefers-reduced-motion:reduce){.tilt{transform:none;transition:none}}
-/* sections */
-section{padding:56px 0}
-h3.h{font:700 clamp(26px,3.4vw,34px)/1.15 var(--serif);margin:0 0 10px;letter-spacing:-.01em}
-.lead{margin:0 0 30px;color:var(--mu);max-width:38em}
-.panel{background:var(--bg);border-radius:28px;box-shadow:var(--raise);padding:28px}
-.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px}
-.item{background:var(--bg);border-radius:22px;box-shadow:var(--raise-s);padding:22px}.item h4{font:700 19px/1.25 var(--serif);margin:0 0 6px}.item p{margin:0;color:var(--mu);font-size:15.5px}
-.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;list-style:none;margin:0;padding:0;counter-reset:s}
-.steps li{counter-increment:s;text-align:center}.steps li:before{content:counter(s);display:grid;place-items:center;width:52px;height:52px;margin:0 auto 12px;border-radius:50%;box-shadow:var(--raise-s);font:700 20px var(--serif);color:var(--bd)}
-.steps b{display:block;font-weight:600;margin-bottom:2px}.steps span{color:var(--mu);font-size:15px}
-.map{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(5,1fr);gap:10px;aspect-ratio:7/4.4;max-width:600px;margin:0 auto}
-.t{display:flex;align-items:flex-end;padding:8px;border-radius:14px;background:var(--bg);box-shadow:var(--raise-s);color:var(--tx);font:600 12px/1.1 var(--sans);cursor:pointer;min-width:0;overflow:hidden;transition:box-shadow .15s}
-.t.on{box-shadow:var(--press);color:var(--bd)}
-.cap{text-align:center;color:var(--mu);font-size:14px;margin:18px 0 0}#sel{font-weight:600;color:var(--tx)}
-.inst{margin:14px 0 0;font-size:15px;color:var(--mu)}html[data-inst] .inst{display:none}
-footer{padding:32px 0 40px;text-align:center;color:var(--mu);font-size:14px}
-[lang=ms] [data-en]{display:none}[lang=en] [data-ms]{display:none}
-@media(max-width:820px){.grid2{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}.face{padding:36px 28px 28px;min-height:0}.bar{padding-top:max(20px,env(safe-area-inset-top))}}
-@media(max-width:480px){.steps{grid-template-columns:1fr}.t{font-size:0;padding:0}.t.on{color:var(--bd)}.panel{padding:20px}.map{gap:7px}}
-@media(prefers-reduced-motion:reduce){.go,.alt,.rb,body{transition:none}html{scroll-behavior:auto}#trk i{animation:none;width:60%}}
-/* launcher (app mode) */
-html.app,html.app body{margin:0;height:100%;overflow:hidden;background:#0F3B36}
-html.app .land{display:none}
-#splash,#app{display:none}
-html.app #app{display:block;position:fixed;top:env(safe-area-inset-top,0px);right:0;bottom:0;left:0;width:100%;height:calc(100% - env(safe-area-inset-top,0px));border:0;background:#0F3B36}
-html.app #splash{display:flex;position:fixed;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0F3B36;color:#EAF6F4;text-align:center;padding:24px;transition:opacity .4s;z-index:2}
-#splash img{width:120px;height:120px;border-radius:27px;box-shadow:8px 8px 20px #052221,-6px -6px 16px #1F6A66}
-#splash h2{margin:0;font:700 20px/1.25 var(--serif);color:#EAF6F4}
-#splash #msg{font:600 16px/1.4 var(--sans);color:#EAF6F4;max-width:300px}
-#splash #sub{display:none;font:400 14px/1.5 var(--sans);color:#B5D6D2;max-width:300px;margin:0}
+:root{--serif:"Source Serif 4","Iowan Old Style",Georgia,"Times New Roman",serif;--sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--bg:#0F3B36;--hi:#1F6A66;--lo:#052221;--tx:#EAF6F4;--mu:#B5D6D2;--gold:#FFE7A8}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font:400 16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+#app{position:fixed;top:env(safe-area-inset-top,0px);right:0;bottom:0;left:0;width:100%;height:calc(100% - env(safe-area-inset-top,0px));border:0;background:var(--bg)}
+/* splash */
+#splash{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));text-align:center;background:radial-gradient(120% 80% at 50% 28%,#17524C 0%,var(--bg) 62%);transition:opacity .45s ease,visibility .45s}
+#splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+.mark{position:relative;width:132px;height:132px;display:grid;place-items:center;margin-bottom:28px}
+.mark:before{content:"";position:absolute;inset:-18px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,231,168,.20),rgba(255,231,168,0));animation:glow 3.2s ease-in-out infinite}
+.mark img{position:relative;width:132px;height:132px;border-radius:30px;box-shadow:10px 10px 24px var(--lo),-8px -8px 20px var(--hi);animation:rise .7s cubic-bezier(.2,.7,.2,1) both}
+h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;animation:fade .7s .12s both}
+.tag{margin:8px 0 0;color:var(--mu);font-size:14.5px;animation:fade .7s .2s both}
+#state{margin-top:38px;min-height:84px;display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:320px}
+#trk{width:168px;height:6px;border-radius:3px;background:#0A302D;box-shadow:inset 2px 2px 4px var(--lo),inset -2px -2px 4px var(--hi);overflow:hidden;position:relative}
+#trk i{position:absolute;top:0;bottom:0;left:0;width:42%;border-radius:3px;background:linear-gradient(90deg,#1F8A85,var(--gold));animation:slide 1.5s cubic-bezier(.45,0,.2,1) infinite}
+#msg{font:600 15px/1.4 var(--sans)}
+#sub{display:none;margin:0;color:var(--mu);font-size:14px;line-height:1.5}
+#acts{display:none;flex-direction:column;gap:12px;width:100%}
+#splash.slow #sub,#splash.off #sub,#splash.slow #acts,#splash.off #acts{display:flex}
 #splash.slow #sub,#splash.off #sub{display:block}
-#splash.gone{opacity:0;pointer-events:none}
-#trk{width:160px;height:6px;border-radius:3px;background:#0A302D;box-shadow:inset 2px 2px 4px #052221,inset -2px -2px 4px #1F6A66;overflow:hidden}
-#trk i{display:block;height:100%;width:8%;background:linear-gradient(90deg,#1F8A85,#0F4F4C);border-radius:3px;animation:trk 10s cubic-bezier(.2,.7,.3,1) forwards}
-#splash.gone #trk i{animation:none;width:100%}
 #splash.slow #trk,#splash.off #trk{display:none}
-@keyframes trk{to{width:90%}}
-#acts{display:none;flex-direction:column;gap:12px;width:100%;max-width:300px}
-#splash.slow #acts,#splash.off #acts{display:flex}
-#acts .sb{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:16px;font:600 16px var(--sans);text-decoration:none;border:0;background:linear-gradient(180deg,#1F8A85,#0F4F4C);color:#fff;cursor:pointer}
-#acts .sb.g{background:#0F3B36;box-shadow:6px 6px 14px #052221,-6px -6px 14px #1F6A66;color:#EAF6F4}
-#splash.off #acts .sb.g{display:none}
-#acts .sb:focus-visible{outline:3px solid #FFE7A8;outline-offset:3px}
+#splash.off #acts .g{display:none}
+.sb{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:16px;border:0;font:600 16px var(--sans);text-decoration:none;cursor:pointer;color:#fff;background:linear-gradient(180deg,#1F8A85,#0F4F4C);box-shadow:0 8px 18px rgba(2,20,19,.5),inset 0 1px 0 rgba(255,255,255,.2)}
+.sb.g{background:var(--bg);color:var(--tx);box-shadow:6px 6px 14px var(--lo),-6px -6px 14px var(--hi)}
+.sb:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@keyframes slide{0%{left:-45%}100%{left:103%}}
+@keyframes glow{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:scale(1.06)}}
+@keyframes rise{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+[lang=ms] [data-en],[lang=en] [data-ms]{display:none}
+@media(prefers-reduced-motion:reduce){#splash{transition:none}.mark:before,.mark img,h1,.tag{animation:none}#trk i{animation:none;left:0;width:60%}}
 </style>
 </head>
 <body>
-<div class="land">
-<div class="w">
-<header class="bar">
- <a class="brand" href="#top">Sarawak Heritage Inventory</a>
- <div class="ctl">
-  <span class="lang" role="group" aria-label="Language"><button type="button" data-l="en" aria-pressed="true">EN</button><button type="button" data-l="ms" aria-pressed="false">BM</button></span>
-  <button type="button" class="rb" id="th" aria-label="Dark mode"><span class="sun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><span class="moon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.5a8.5 8.5 0 108 11.5A7 7 0 0115.5 3.5z" fill="currentColor"/></svg></span></button>
+<div id="splash" role="status" aria-live="polite">
+ <div class="mark"><img src="apple-touch-icon.png" alt=""></div>
+ <h1>Sarawak Heritage Inventory</h1>
+ <p class="tag"><span data-en>Heritage sites and antiquities</span><span data-ms>Tapak warisan dan antikuiti</span></p>
+ <div id="state">
+  <div id="trk" aria-hidden="true"><i></i></div>
+  <div id="msg"></div>
+  <p id="sub"></p>
+  <div id="acts"><button type="button" class="sb" id="retry"></button><a class="sb g" id="open" target="_top"></a></div>
  </div>
-</header>
-<main id="top">
-<div class="hero"><div class="copy"><h1><span data-en>The working record of Sarawak’s heritage.</span><span data-ms>Rekod kerja warisan Sarawak.</span></h1><p class="lede"><span data-en>Gazetted sites, Director’s List entries, potential sites and antiquities in one place, kept up to date by staff in the office and in the field.</span><span data-ms>Tapak diwartakan, penyenaraian Senarai Pengarah, tapak berpotensi dan antikuiti di satu tempat, dikemas kini oleh kakitangan di pejabat dan di lapangan.</span></p></div>
-<div class="stage"><div class="scene"><div class="tilt" id="tilt">
- <section class="face door" aria-label="Open the app">
-  <div class="badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10.5L12 4l8 6.5V20" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><path d="M9.5 20v-5.2a2.5 2.5 0 015 0V20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
-  <h2><span data-en>Open the inventory</span><span data-ms>Buka inventori</span></h2>
-  <p class="sub"><span data-en>You will sign in on the next screen.</span><span data-ms>Anda akan log masuk pada skrin seterusnya.</span></p>
-  <button type="button" class="go" data-go="in"><span data-en>Open the app</span><span data-ms>Buka aplikasi</span></button>
-  <div class="or"><span data-en>New to the team?</span><span data-ms>Baharu dalam pasukan?</span></div>
-  <button type="button" class="alt" data-go="up"><span data-en>Apply for access</span><span data-ms>Mohon akses</span></button>
-  <p class="hint"><span data-en>For authorised personnel only. An administrator approves each request.</span><span data-ms>Untuk kakitangan yang diberi kuasa sahaja. Pentadbir meluluskan setiap permohonan.</span></p>
- </section>
-</div></div></div></div>
-</main>
 </div>
-
-<section id="records"><div class="w">
- <h3 class="h"><span data-en>What the inventory holds</span><span data-ms>Kandungan inventori</span></h3><p class="lead"><span data-en>Each record carries its legal status, where it is kept or found, what it looks like and what condition it is in.</span><span data-ms>Setiap rekod mengandungi status undang-undangnya, di mana ia disimpan atau ditemui, rupanya dan keadaannya.</span></p>
- <div class="grid2"><div class="item"><h4><span data-en>Gazetted sites</span><span data-ms>Tapak diwartakan</span></h4><p><span data-en>Sites under legal protection, with gazette number, date and the ordinance that protects them.</span><span data-ms>Tapak di bawah perlindungan undang-undang, dengan nombor warta, tarikh dan ordinan yang melindunginya.</span></p></div><div class="item"><h4><span data-en>Director’s List</span><span data-ms>Senarai Pengarah</span></h4><p><span data-en>Sites listed for protection but not yet gazetted, with their legal reference and stage.</span><span data-ms>Tapak yang disenaraikan untuk perlindungan tetapi belum diwartakan, dengan rujukan undang-undang dan peringkatnya.</span></p></div><div class="item"><h4><span data-en>Potential sites</span><span data-ms>Tapak berpotensi</span></h4><p><span data-en>Places worth assessing, kept alongside the sites already protected so nothing is lost between surveys.</span><span data-ms>Tempat yang wajar dinilai, disimpan bersama tapak yang telah dilindungi supaya tiada yang tercicir antara tinjauan.</span></p></div><div class="item"><h4><span data-en>Antiquities</span><span data-ms>Antikuiti</span></h4><p><span data-en>Registers for antiquities and their dealers, and for excavation and export records.</span><span data-ms>Daftar antikuiti dan peniaganya, serta rekod penggalian dan eksport.</span></p></div></div>
-</div></section>
-
-<section id="how"><div class="w"><div class="panel">
- <h3 class="h"><span data-en>How staff use it</span><span data-ms>Cara kakitangan menggunakannya</span></h3><p class="lead"><span data-en>The same four steps for a new record or an update to an old one.</span><span data-ms>Empat langkah yang sama untuk rekod baharu atau kemas kini rekod lama.</span></p>
- <ol class="steps"><li><b><span data-en>Sign in</span><span data-ms>Log masuk</span></b><span><span data-en>Use your approved username and password.</span><span data-ms>Guna nama pengguna dan kata laluan yang diluluskan.</span></span></li><li><b><span data-en>Find or add the site</span><span data-ms>Cari atau tambah tapak</span></b><span><span data-en>Search by name, division or reference number, or start a new record.</span><span data-ms>Cari mengikut nama, bahagian atau nombor rujukan, atau mulakan rekod baharu.</span></span></li><li><b><span data-en>Add photos and location</span><span data-ms>Tambah gambar dan lokasi</span></b><span><span data-en>Attach photographs and mark the site’s position on the map.</span><span data-ms>Lampirkan gambar dan tanda kedudukan tapak pada peta.</span></span></li><li><b><span data-en>Print or share</span><span data-ms>Cetak atau kongsi</span></b><span><span data-en>Produce a record sheet or a statistics report when one is needed.</span><span data-ms>Hasilkan helaian rekod atau laporan statistik apabila diperlukan.</span></span></li></ol>
-</div></div></section>
-
-<section><div class="w grid2">
- <div class="panel"><h3 class="h"><span data-en>Built for the field</span><span data-ms>Dibina untuk lapangan</span></h3><p class="lead" style="margin:0"><span data-en>Works on a phone or tablet as well as a desktop, in English and Bahasa Melayu, in light or dark display. Records can be reviewed with limited connectivity.</span><span data-ms>Berfungsi pada telefon atau tablet serta desktop, dalam Bahasa Melayu dan Inggeris, paparan cerah atau gelap. Rekod boleh disemak dengan sambungan yang terhad.</span></p><p class="inst"><span data-en>To install: on iPhone, open this page in Safari, tap Share, then Add to Home Screen. On Android, open it in Chrome, open the menu, then tap Install app.</span><span data-ms>Untuk memasang: pada iPhone, buka halaman ini dalam Safari, ketik Kongsi, kemudian Tambah ke Skrin Utama. Pada Android, buka dalam Chrome, buka menu, kemudian ketik Pasang aplikasi.</span></p></div>
- <div class="panel"><h3 class="h"><span data-en>Thirteen divisions</span><span data-ms>Tiga belas bahagian</span></h3><div class="map" id="grid" role="list" aria-label="Sarawak divisions"></div><p class="cap"><span data-en>Every record belongs to one division. Tap a tile to see its name.</span><span data-ms>Setiap rekod dimiliki satu bahagian. Ketik jubin untuk melihat namanya.</span> <span id="sel" aria-live="polite"></span></p></div>
-</div></section>
-<footer><div class="w"><span data-en>For authorised personnel only. Access requests are approved by an administrator.</span><span data-ms>Untuk kakitangan yang diberi kuasa sahaja. Permohonan akses diluluskan oleh pentadbir.</span></div></footer>
-</div>
-
-<div id="splash" role="status" aria-live="polite"><img src="apple-touch-icon.png" alt=""><h2>Sarawak Heritage Inventory</h2><div id="trk" aria-hidden="true"><i></i></div><div id="msg"></div><p id="sub"></p><div id="acts"><button type="button" class="sb" id="retry"></button><a class="sb g" id="open" target="_top"></a></div></div>
 <iframe id="app" title="Sarawak Heritage Inventory" allow="clipboard-write; fullscreen; geolocation"></iframe>
 <script>
 (function(){
- var D=[['Lawas',6,0],['Limbang',5,0],['Miri',5,1],['Bintulu',4,2],['Mukah',3,2],['Kapit',4,3],['Sibu',3,3],['Sarikei',2,3],['Betong',2,4],['Sri Aman',1,4],['Samarahan',1,3],['Kuching',0,3],['Serian',0,4]];
- var g=document.getElementById('grid'),sel=document.getElementById('sel');
- D.forEach(function(d){var b=document.createElement('div');b.className='t';b.setAttribute('role','listitem');b.tabIndex=0;b.textContent=d[0];b.style.gridColumn=d[1]+1;b.style.gridRow=d[2]+1;g.appendChild(b)});
- function pick(t){document.querySelectorAll('.t.on').forEach(function(x){x.classList.remove('on')});t.classList.add('on');sel.textContent=t.textContent+'.'}
- g.addEventListener('click',function(e){var t=e.target.closest('.t');if(t)pick(t)});
- g.addEventListener('keydown',function(e){if((e.key=='Enter'||e.key==' ')&&e.target.classList.contains('t')){e.preventDefault();pick(e.target)}});
- var bs=document.querySelectorAll('.lang button');
- function set(l){document.documentElement.lang=l;bs.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.l==l?'true':'false')});try{localStorage.setItem('shi_land',l)}catch(e){}}
- bs.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.l)})});
- var s='en';try{s=localStorage.getItem('shi_land')||((navigator.language||'').slice(0,2)=='ms'?'ms':'en')}catch(e){}
- set(s);
- // theme
- var th=document.getElementById('th');
- th.addEventListener('click',function(){var d=document.documentElement,n=d.getAttribute('data-theme')=='dark'?'light':'dark';d.setAttribute('data-theme',n);try{localStorage.setItem('shi_th',n)}catch(e){}th.setAttribute('aria-pressed',n=='dark'?'true':'false')});
-})();
-</script>
-<script>
-  var APP = 'https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec';
-  var pending = null;
-  /* This page keeps the device ID for two-step sign-in and hands over the username typed on the landing card (never a password). */
-  window.addEventListener('message', function (e) {
-    var d = e.data;
-    if (!d || !/^https:\/\/([a-z0-9-]+\.)*(googleusercontent|google)\.com$/.test(e.origin)) return;
-    if (d.shiDev === 'get') {
-      var v = '';
-      try { v = localStorage.getItem('shi_dev_top') || ''; } catch (x) {}
-      if (!/^[0-9a-f]{32}$/.test(v)) {
-        var a = new Uint8Array(16); (window.crypto || {}).getRandomValues && crypto.getRandomValues(a);
-        v = Array.prototype.map.call(a, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
-        try { localStorage.setItem('shi_dev_top', v); } catch (x) {}
-      }
-      try { e.source.postMessage({ shiDev: v }, e.origin); } catch (x) {}
-    } else if (d.shiReady && pending) {
-      try { e.source.postMessage({ shiGo: pending.go, shiUser: pending.user }, e.origin); } catch (x) {}
-      pending = null;
-    }
+  var APP='https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec';
+  var L='en';try{L=localStorage.getItem('shi_land')||((navigator.language||'').slice(0,2)=='ms'?'ms':'en')}catch(e){}
+  document.documentElement.lang=L=='ms'?'ms':'en';
+  /* Keeps the device ID for two-step sign-in (the app asks this page for it). */
+  window.addEventListener('message',function(e){
+    var d=e.data;if(!d||!/^https:\/\/([a-z0-9-]+\.)*(googleusercontent|google)\.com$/.test(e.origin))return;
+    if(d.shiDev==='get'){var v='';try{v=localStorage.getItem('shi_dev_top')||''}catch(x){}
+      if(!/^[0-9a-f]{32}$/.test(v)){var a=new Uint8Array(16);(window.crypto||{}).getRandomValues&&crypto.getRandomValues(a);v=Array.prototype.map.call(a,function(b){return('0'+b.toString(16)).slice(-2)}).join('');try{localStorage.setItem('shi_dev_top',v)}catch(x){}}
+      try{e.source.postMessage({shiDev:v},e.origin)}catch(x){}}
   });
-  var TXT = {
-    en: { load: 'Opening the inventory…', slow: 'Still loading.', slowSub: 'This can take a moment on a slow connection. You can keep waiting, try again, or open the app in your browser.', off: 'You are offline.', offSub: 'Connect to Wi-Fi or mobile data, then try again.', retry: 'Try again', browser: 'Open in browser' },
-    ms: { load: 'Membuka inventori…', slow: 'Masih memuatkan.', slowSub: 'Ini mungkin mengambil sedikit masa jika sambungan perlahan. Anda boleh terus menunggu, cuba lagi, atau buka aplikasi dalam pelayar.', off: 'Anda di luar talian.', offSub: 'Sambung ke Wi-Fi atau data mudah alih, kemudian cuba lagi.', retry: 'Cuba lagi', browser: 'Buka dalam pelayar' }
-  };
-  var splash = document.getElementById('splash'), frame = document.getElementById('app'), msg = document.getElementById('msg'), sub = document.getElementById('sub'), retry = document.getElementById('retry'), openA = document.getElementById('open'), slowT = 0, loaded = false;
-  function tx() { return TXT[document.documentElement.lang == 'ms' ? 'ms' : 'en']; }
-  function state(k) {
-    var T = tx();
-    splash.classList.remove('slow', 'off');
-    if (k == 'slow') { splash.classList.add('slow'); msg.textContent = T.slow; sub.textContent = T.slowSub; }
-    else if (k == 'off') { splash.classList.add('off'); msg.textContent = T.off; sub.textContent = T.offSub; }
-    else msg.textContent = T.load;
-    retry.textContent = T.retry; openA.textContent = T.browser;
-  }
-  function load() {
-    loaded = false; splash.classList.remove('gone');
-    var i = document.querySelector('#trk i'); i.style.animation = 'none'; void i.offsetWidth; i.style.animation = '';
-    clearTimeout(slowT);
-    if (navigator.onLine === false) { state('off'); return; }
+  var TXT={
+   en:{load:'Opening the inventory…',slow:'Still loading.',slowSub:'This can take a moment on a slow connection. You can keep waiting, try again, or open the app in your browser.',off:'You are offline.',offSub:'Connect to Wi-Fi or mobile data, then try again.',retry:'Try again',browser:'Open in browser'},
+   ms:{load:'Membuka inventori…',slow:'Masih memuatkan.',slowSub:'Ini mungkin mengambil sedikit masa jika sambungan perlahan. Anda boleh terus menunggu, cuba lagi, atau buka aplikasi dalam pelayar.',off:'Anda di luar talian.',offSub:'Sambung ke Wi-Fi atau data mudah alih, kemudian cuba lagi.',retry:'Cuba lagi',browser:'Buka dalam pelayar'}};
+  var splash=document.getElementById('splash'),frame=document.getElementById('app'),msg=document.getElementById('msg'),sub=document.getElementById('sub'),retry=document.getElementById('retry'),openA=document.getElementById('open'),slowT=0,loaded=false,t0=Date.now();
+  function T(){return TXT[document.documentElement.lang=='ms'?'ms':'en']}
+  function state(k){var t=T();splash.classList.remove('slow','off');
+    if(k=='slow'){splash.classList.add('slow');msg.textContent=t.slow;sub.textContent=t.slowSub}
+    else if(k=='off'){splash.classList.add('off');msg.textContent=t.off;sub.textContent=t.offSub}
+    else msg.textContent=t.load;
+    retry.textContent=t.retry;openA.textContent=t.browser}
+  function load(){loaded=false;splash.classList.remove('gone');t0=Date.now();clearTimeout(slowT);
+    if(navigator.onLine===false){state('off');return}
     state('load');
-    // First load sets src; a retry replaces the frame's address so it adds no history entries (Back keeps working).
-    if (!frame.getAttribute('src')) frame.src = APP;
-    else { try { frame.contentWindow.location.replace(APP); } catch (x) { frame.src = APP; } }
-    slowT = setTimeout(function () { if (!loaded) state('slow'); }, 12000);
-  }
-  frame.addEventListener('load', function () {
-    loaded = true; clearTimeout(slowT); splash.classList.remove('slow', 'off'); splash.classList.add('gone');
-  });
-  retry.addEventListener('click', load);
-  window.addEventListener('online', function () { if (document.documentElement.className == 'app' && !loaded) load(); });
-  window.addEventListener('offline', function () { if (document.documentElement.className == 'app' && !loaded) { clearTimeout(slowT); state('off'); } });
-  openA.href = APP;
-  function startApp(push, go, user) {
-    if (!frame.getAttribute('src') && go) pending = { go: go, user: String(user || '').slice(0, 64) };
-    document.documentElement.className = 'app';
-    if (push) { try { history.pushState({ app: 1 }, '', '?app'); } catch (x) {} }
-    if (!frame.getAttribute('src')) load();
-  }
-  // Back (browser or iPhone swipe) returns to the landing page; the app stays loaded and signed in.
-  window.addEventListener('popstate', function () {
-    document.documentElement.className = /[?&]app\b/.test(location.search) ? 'app' : '';
-  });
-  // Sign in / Request access: stay in this window (full screen) instead of opening a new browser.
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest && e.target.closest('[data-go]');
-    if (!b) return;
-    e.preventDefault();
-    startApp(true, b.getAttribute('data-go'), '');
-  });
-  if (document.documentElement.className == 'app') startApp(false);
+    /* A retry replaces the frame address so it adds no history entries. */
+    if(!frame.getAttribute('src'))frame.src=APP;else{try{frame.contentWindow.location.replace(APP)}catch(x){frame.src=APP}}
+    slowT=setTimeout(function(){if(!loaded)state('slow')},12000)}
+  frame.addEventListener('load',function(){
+    loaded=true;clearTimeout(slowT);
+    /* Show the splash for at least 0.9 s so it never flashes. */
+    setTimeout(function(){splash.classList.remove('slow','off');splash.classList.add('gone')},Math.max(0,900-(Date.now()-t0)))});
+  retry.addEventListener('click',load);
+  window.addEventListener('online',function(){if(!loaded)load()});
+  window.addEventListener('offline',function(){if(!loaded){clearTimeout(slowT);state('off')}});
+  openA.href=APP;
+  load();
+})();
 </script>
 </body>
 </html>
