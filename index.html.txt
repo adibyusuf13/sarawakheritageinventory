@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sarawak Heritage Inventory</title>
+<meta name="description" content="Sarawak Heritage Inventory">
+<meta name="theme-color" content="#0E3B36">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SK Heritage">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  html, body { margin: 0; height: 100%; background: #0E3B36; overflow: hidden; }
+  #app { position: fixed; top: env(safe-area-inset-top, 0px); right: 0; bottom: 0; left: 0;
+         width: 100%; height: calc(100% - env(safe-area-inset-top, 0px)); border: 0; background: #F4F2EC; }
+  #splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 18px; background: #0E3B36; color: #F4E7C5; font: 600 16px system-ui, -apple-system, Segoe UI, sans-serif;
+            text-align: center; padding: 24px; transition: opacity .4s; z-index: 2; }
+  #splash img { width: 140px; height: 140px; border-radius: 30px; box-shadow: 0 10px 30px #0008; }
+  #splash.gone { opacity: 0; pointer-events: none; }
+  #open { display: none; padding: 12px 20px; border-radius: 10px; background: #C9A24A; color: #10302C;
+          text-decoration: none; font-weight: 700; }
+  #splash.slow #open { display: inline-block; }
+</style>
+</head>
+<body>
+<div id="splash" role="status">
+  <img src="apple-touch-icon.png" alt="">
+  <div>Sarawak Heritage Inventory</div>
+  <div id="msg">Loading…</div>
+  <a id="open" target="_top">Open the app</a>
+</div>
+<iframe id="app" title="Sarawak Heritage Inventory" allow="clipboard-write; fullscreen; geolocation"></iframe>
+<script>
+  // The Google Apps Script web app address (stays the same when you deploy a new version).
+  var APP = 'https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec';
+  var open = document.getElementById('open'), splash = document.getElementById('splash'), frame = document.getElementById('app');
+  open.href = APP;
+  // Add ?direct to the address to skip the frame and open the app page itself.
+  if (/[?&]direct\b/.test(location.search)) { location.replace(APP); }
+  else {
+    frame.addEventListener('load', function () { splash.classList.add('gone'); });
+    frame.src = APP;
+    setTimeout(function () {
+      if (!splash.classList.contains('gone')) {
+        splash.classList.add('slow');
+        document.getElementById('msg').textContent = 'Taking longer than usual.';
+      }
+    }, 12000);
+  }
+</script>
+</body>
+</html>
