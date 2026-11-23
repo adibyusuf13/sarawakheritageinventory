@@ -2,57 +2,139 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sarawak Heritage Inventory</title>
-<meta name="description" content="Sarawak Heritage Inventory">
-<meta name="theme-color" content="#0E3B36">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="SK Heritage">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="manifest" href="manifest.webmanifest">
+<meta name="description" content="The working record of Sarawak's gazetted and listed heritage sites and antiquities. For authorised heritage staff.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,700&display=swap" rel="stylesheet">
 <style>
-  html, body { margin: 0; height: 100%; background: #0E3B36; overflow: hidden; }
-  #app { position: fixed; top: env(safe-area-inset-top, 0px); right: 0; bottom: 0; left: 0;
-         width: 100%; height: calc(100% - env(safe-area-inset-top, 0px)); border: 0; background: #F4F2EC; }
-  #splash { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 18px; background: #0E3B36; color: #F4E7C5; font: 600 16px system-ui, -apple-system, Segoe UI, sans-serif;
-            text-align: center; padding: 24px; transition: opacity .4s; z-index: 2; }
-  #splash img { width: 140px; height: 140px; border-radius: 30px; box-shadow: 0 10px 30px #0008; }
-  #splash.gone { opacity: 0; pointer-events: none; }
-  #open { display: none; padding: 12px 20px; border-radius: 10px; background: #C9A24A; color: #10302C;
-          text-decoration: none; font-weight: 700; }
-  #splash.slow #open { display: inline-block; }
+:root{--ground:#E3EDEB;--ink:#0E2E2C;--teal:#1F7F7C;--teal-d:#125B59;--belian:#6E3F22;--gold:#B69A62;--paper:#FAFCFB;--mute:#44605E;--line:#BFD3D0;
+--serif:'Source Serif 4',Georgia,'Times New Roman',serif;--sans:Inter,system-ui,-apple-system,'Segoe UI',sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--teal-d)}a:focus-visible,button:focus-visible{outline:3px solid var(--belian);outline-offset:3px;border-radius:4px}
+.w{max-width:1120px;margin:0 auto;padding:0 24px}
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0}
+.brand{font:700 18px/1.2 var(--serif);letter-spacing:.01em;color:var(--ink);text-decoration:none}
+.bar nav{display:flex;align-items:center;gap:20px;font-size:15px}.bar nav a{color:var(--ink);text-decoration:none}.bar nav a:hover{text-decoration:underline}
+.lang{display:inline-flex;border:1px solid var(--ink);border-radius:6px;overflow:hidden}.lang button{border:0;background:none;padding:5px 11px;font:600 13px var(--sans);color:var(--ink);cursor:pointer;min-height:32px}.lang button[aria-pressed=true]{background:var(--ink);color:#fff}
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center;padding:56px 0 88px}
+h1{font:700 clamp(38px,5.6vw,62px)/1.04 var(--serif);letter-spacing:-.02em;margin:0 0 22px;max-width:14ch}
+.lede{font-size:19px;max-width:34em;margin:0 0 30px;color:var(--ink)}
+.cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 24px;border-radius:6px;font:600 16px var(--sans);text-decoration:none;border:2px solid var(--teal-d);background:var(--teal-d);color:#fff}
+.btn:hover{background:var(--ink);border-color:var(--ink)}
+.btn.alt{background:none;color:var(--teal-d)}.btn.alt:hover{background:var(--teal-d);color:#fff}
+.note{margin:22px 0 0;font-size:14.5px;color:var(--mute)}
+/* the division map: 13 divisions laid out roughly as they sit on the map */
+.map{position:relative}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(5,minmax(0,1fr));gap:6px;aspect-ratio:7/5;max-width:520px;margin-left:auto}
+.t{display:flex;align-items:flex-end;padding:8px 7px;border-radius:5px;background:var(--teal);color:#fff;font:600 12px/1.15 var(--sans);border:0;text-align:left;cursor:default;min-width:0;overflow:hidden;opacity:0;transform:translateY(6px);animation:tin .5s ease forwards}
+.t:hover,.t:focus-visible{outline:3px solid var(--gold);outline-offset:1px;z-index:1}
+@keyframes tin{to{opacity:1;transform:none}}
+.cap{margin:14px 0 0;max-width:520px;margin-left:auto;font-size:14px;color:var(--mute)}
+@media(prefers-reduced-motion:reduce){.t{animation:none;opacity:1;transform:none}html{scroll-behavior:auto}}
+/* sections */
+section{padding:72px 0;border-top:1px solid var(--line)}
+section.dk{background:var(--ink);color:#EAF3F1;border-top:0}section.dk a{color:#9FE0DB}
+h2{font:700 clamp(28px,3.6vw,38px)/1.12 var(--serif);letter-spacing:-.01em;margin:0 0 14px;max-width:20ch}
+.sub{max-width:38em;margin:0 0 36px;color:var(--mute)}.dk .sub{color:#B9D0CD}
+.reg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 56px;margin:0}
+.reg div{padding:20px 0;border-top:1px solid var(--line)}.reg dt{font:700 20px/1.25 var(--serif);margin:0 0 4px}.reg dd{margin:0;color:var(--mute);max-width:30em}
+.how{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px;counter-reset:s}
+.how li{counter-increment:s;border-top:3px solid var(--gold);padding-top:16px}.how li:before{content:counter(s);display:block;font:700 34px/1 var(--serif);color:var(--gold);margin-bottom:10px}
+.how b{display:block;font:600 17px var(--sans);margin-bottom:4px}.how span{color:#B9D0CD;font-size:15.5px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:56px}
+.two h3{font:700 22px/1.2 var(--serif);margin:0 0 8px}.two p{margin:0 0 14px;color:var(--mute)}
+.access{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center}
+footer{background:var(--ink);color:#B9D0CD;padding:36px 0;font-size:14.5px}footer .w{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}footer a{color:#9FE0DB}
+[lang=ms] [data-en]{display:none}[lang=en] [data-ms]{display:none}
+@media(max-width:860px){.hero{grid-template-columns:1fr;gap:36px;padding:28px 0 56px}.grid,.cap{margin-left:0}.reg,.two{grid-template-columns:1fr;gap:0}.two>div+div{margin-top:28px}.how{grid-template-columns:1fr 1fr}.access{grid-template-columns:1fr}.bar nav a.h{display:none}}
+@media(max-width:480px){.how{grid-template-columns:1fr}body{font-size:16.5px}.t{font-size:8.8px;padding:4px 2px;letter-spacing:-.02em}}
 </style>
 </head>
 <body>
-<div id="splash" role="status">
-  <img src="apple-touch-icon.png" alt="">
-  <div>Sarawak Heritage Inventory</div>
-  <div id="msg">Loading…</div>
-  <a id="open" target="_top">Open the app</a>
+<div class="w">
+<header class="bar">
+ <a class="brand" href="#top">Sarawak Heritage Inventory</a>
+ <nav aria-label="Main">
+  <a class="h" href="#records"><span data-en>What it holds</span><span data-ms>Kandungan</span></a>
+  <a class="h" href="#access"><span data-en>Access</span><span data-ms>Akses</span></a>
+  <span class="lang" role="group" aria-label="Language"><button type="button" data-l="en" aria-pressed="true">EN</button><button type="button" data-l="ms" aria-pressed="false">BM</button></span>
+ </nav>
+</header>
+
+<main id="top">
+<div class="hero">
+ <div>
+  <h1><span data-en>The working record of Sarawak’s built heritage.</span><span data-ms>Rekod kerja warisan binaan Sarawak.</span></h1>
+  <p class="lede"><span data-en>One place for gazetted sites, Director’s List entries, potential sites and antiquities. Staff keep each record, its photographs and its location up to date, from the office or from the field.</span><span data-ms>Satu tempat untuk tapak diwartakan, penyenaraian Senarai Pengarah, tapak berpotensi dan antikuiti. Kakitangan mengemas kini setiap rekod, gambar dan lokasinya, sama ada dari pejabat atau di lapangan.</span></p>
+  <div class="cta">
+   <a class="btn" href="https://tinyurl.com/sarawakheritageinventory"><span data-en>Sign in</span><span data-ms>Log masuk</span></a>
+   <a class="btn alt" href="https://tinyurl.com/sarawakheritageinventory"><span data-en>Apply for access</span><span data-ms>Mohon akses</span></a>
+  </div>
+  <p class="note"><span data-en>For authorised personnel only. Access requests are approved by an administrator.</span><span data-ms>Untuk kakitangan yang diberi kuasa sahaja. Permohonan akses diluluskan oleh pentadbir.</span></p>
+ </div>
+ <div class="map">
+  <div class="grid" id="grid" role="list" aria-label="Sarawak divisions"></div>
+  <p class="cap"><span data-en>The thirteen divisions of Sarawak, placed roughly as they sit on the map. Every record belongs to one.</span><span data-ms>Tiga belas bahagian Sarawak, disusun menghampiri kedudukannya pada peta. Setiap rekod dimiliki satu bahagian.</span></p>
+ </div>
 </div>
-<iframe id="app" title="Sarawak Heritage Inventory" allow="clipboard-write; fullscreen; geolocation"></iframe>
+</main>
+</div>
+
+<section id="records"><div class="w">
+ <h2><span data-en>What the inventory holds</span><span data-ms>Kandungan inventori</span></h2>
+ <p class="sub"><span data-en>Each record carries the legal status of the site, where it is, what it looks like and what condition it is in.</span><span data-ms>Setiap rekod mengandungi status undang-undang tapak, lokasinya, rupanya dan keadaannya.</span></p>
+ <dl class="reg">
+  <div><dt><span data-en>Gazetted sites</span><span data-ms>Tapak diwartakan</span></dt><dd><span data-en>Sites under legal protection, with gazette number, date and the ordinance that protects them.</span><span data-ms>Tapak di bawah perlindungan undang-undang, dengan nombor warta, tarikh dan ordinan yang melindunginya.</span></dd></div>
+  <div><dt><span data-en>Director’s List</span><span data-ms>Senarai Pengarah</span></dt><dd><span data-en>Sites listed for protection but not yet gazetted, with their legal reference and stage.</span><span data-ms>Tapak yang disenaraikan untuk perlindungan tetapi belum diwartakan, dengan rujukan undang-undang dan peringkatnya.</span></dd></div>
+  <div><dt><span data-en>Potential sites</span><span data-ms>Tapak berpotensi</span></dt><dd><span data-en>Places worth assessing, kept alongside the sites already protected so nothing is lost between surveys.</span><span data-ms>Tempat yang wajar dinilai, disimpan bersama tapak yang telah dilindungi supaya tiada yang tercicir antara tinjauan.</span></dd></div>
+  <div><dt><span data-en>Antiquities</span><span data-ms>Antikuiti</span></dt><dd><span data-en>Registers for antiquities and their dealers, and for excavation and export records.</span><span data-ms>Daftar antikuiti dan peniaganya, serta rekod penggalian dan eksport.</span></dd></div>
+ </dl>
+</div></section>
+
+<section class="dk" id="how"><div class="w">
+ <h2><span data-en>How staff use it</span><span data-ms>Cara kakitangan menggunakannya</span></h2>
+ <p class="sub"><span data-en>The same four steps for a new record or an update to an old one.</span><span data-ms>Empat langkah yang sama untuk rekod baharu atau kemas kini rekod lama.</span></p>
+ <ol class="how">
+  <li><b><span data-en>Sign in</span><span data-ms>Log masuk</span></b><span><span data-en>Use your approved username and password.</span><span data-ms>Guna nama pengguna dan kata laluan yang diluluskan.</span></span></li>
+  <li><b><span data-en>Find or add the site</span><span data-ms>Cari atau tambah tapak</span></b><span><span data-en>Search by name, division or reference number, or start a new record.</span><span data-ms>Cari mengikut nama, bahagian atau nombor rujukan, atau mulakan rekod baharu.</span></span></li>
+  <li><b><span data-en>Add photos and location</span><span data-ms>Tambah gambar dan lokasi</span></b><span><span data-en>Attach photographs and mark the site’s position on the map.</span><span data-ms>Lampirkan gambar dan tanda kedudukan tapak pada peta.</span></span></li>
+  <li><b><span data-en>Print or share</span><span data-ms>Cetak atau kongsi</span></b><span><span data-en>Produce a record sheet or a statistics report when one is needed.</span><span data-ms>Hasilkan helaian rekod atau laporan statistik apabila diperlukan.</span></span></li>
+ </ol>
+</div></section>
+
+<section><div class="w two">
+ <div><h2><span data-en>Built for the field</span><span data-ms>Dibina untuk lapangan</span></h2>
+  <p><span data-en>The inventory works on a phone or tablet as well as a desktop. Pages are laid out for small screens, and records can be reviewed with limited connectivity.</span><span data-ms>Inventori berfungsi pada telefon atau tablet serta desktop. Halaman disusun untuk skrin kecil, dan rekod boleh disemak dengan sambungan yang terhad.</span></p></div>
+ <div><h2><span data-en>In English and Bahasa Melayu</span><span data-ms>Dalam Bahasa Melayu dan Inggeris</span></h2>
+  <p><span data-en>Every screen can be switched between English and Bahasa Melayu, and light or dark display, from the header.</span><span data-ms>Setiap skrin boleh ditukar antara Bahasa Melayu dan Inggeris, serta paparan cerah atau gelap, dari pengepala.</span></p></div>
+</div></section>
+
+<section id="access"><div class="w access">
+ <div><h2><span data-en>Request access</span><span data-ms>Mohon akses</span></h2>
+ <p class="sub" style="margin:0"><span data-en>Submit your name, designation and department. An administrator reviews each request. Passwords need at least 12 characters and are stored as salted hashes, never as plain text.</span><span data-ms>Hantar nama, jawatan dan jabatan anda. Pentadbir menyemak setiap permohonan. Kata laluan memerlukan sekurang-kurangnya 12 aksara dan disimpan sebagai cincang bergaram, tidak sekali-kali sebagai teks biasa.</span></p></div>
+ <a class="btn" href="https://tinyurl.com/sarawakheritageinventory"><span data-en>Apply for access</span><span data-ms>Mohon akses</span></a>
+</div></section>
+
+<footer><div class="w"><span data-en>For authorised personnel only.</span><span data-ms>Untuk kakitangan yang diberi kuasa sahaja.</span><span>Sarawak Heritage Inventory</span></div></footer>
+
 <script>
-  // The Google Apps Script web app address (stays the same when you deploy a new version).
-  var APP = 'https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec';
-  var open = document.getElementById('open'), splash = document.getElementById('splash'), frame = document.getElementById('app');
-  open.href = APP;
-  // Add ?direct to the address to skip the frame and open the app page itself.
-  if (/[?&]direct\b/.test(location.search)) { location.replace(APP); }
-  else {
-    frame.addEventListener('load', function () { splash.classList.add('gone'); });
-    frame.src = APP;
-    setTimeout(function () {
-      if (!splash.classList.contains('gone')) {
-        splash.classList.add('slow');
-        document.getElementById('msg').textContent = 'Taking longer than usual.';
-      }
-    }, 12000);
-  }
+(function(){
+ // 13 divisions, same placement as the in-app map [col,row]
+ var D=[['Lawas',6,0],['Limbang',5,0],['Miri',5,1],['Bintulu',4,2],['Mukah',3,2],['Kapit',4,3],['Sibu',3,3],['Sarikei',2,3],['Betong',2,4],['Sri Aman',1,4],['Samarahan',1,3],['Kuching',0,3],['Serian',0,4]];
+ var g=document.getElementById('grid');
+ D.forEach(function(d,i){var b=document.createElement('div');b.className='t';b.setAttribute('role','listitem');b.tabIndex=0;b.textContent=d[0];
+  b.style.gridColumn=d[1]+1;b.style.gridRow=d[2]+1;b.style.animationDelay=(i*70)+'ms';g.appendChild(b);});
+ var bs=document.querySelectorAll('.lang button');
+ function set(l){document.documentElement.lang=l;bs.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.l==l?'true':'false')});try{localStorage.setItem('shi_land',l)}catch(e){}}
+ bs.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.l)})});
+ var s='en';try{s=localStorage.getItem('shi_land')||((navigator.language||'').slice(0,2)=='ms'?'ms':'en')}catch(e){}
+ set(s);
+})();
 </script>
 </body>
 </html>
