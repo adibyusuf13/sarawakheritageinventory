@@ -70,12 +70,15 @@ h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;animation:fade 
   var APP='https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec';
   var L='en';try{L=localStorage.getItem('shi_land')||((navigator.language||'').slice(0,2)=='ms'?'ms':'en')}catch(e){}
   document.documentElement.lang=L=='ms'?'ms':'en';
+  /* Skip the app's own intro page: when the app says it is ready, send it straight to its sign-in card (never a password). */
+  var pending={go:'in',user:''};
   /* Keeps the device ID for two-step sign-in (the app asks this page for it). */
   window.addEventListener('message',function(e){
     var d=e.data;if(!d||!/^https:\/\/([a-z0-9-]+\.)*(googleusercontent|google)\.com$/.test(e.origin))return;
     if(d.shiDev==='get'){var v='';try{v=localStorage.getItem('shi_dev_top')||''}catch(x){}
       if(!/^[0-9a-f]{32}$/.test(v)){var a=new Uint8Array(16);(window.crypto||{}).getRandomValues&&crypto.getRandomValues(a);v=Array.prototype.map.call(a,function(b){return('0'+b.toString(16)).slice(-2)}).join('');try{localStorage.setItem('shi_dev_top',v)}catch(x){}}
       try{e.source.postMessage({shiDev:v},e.origin)}catch(x){}}
+    else if(d.shiReady&&pending){try{e.source.postMessage({shiGo:pending.go,shiUser:pending.user},e.origin)}catch(x){}pending=null}
   });
   var TXT={
    en:{load:'Opening the inventory…',slow:'Still loading.',slowSub:'This can take a moment on a slow connection. You can keep waiting, try again, or open the app in your browser.',off:'You are offline.',offSub:'Connect to Wi-Fi or mobile data, then try again.',retry:'Try again',browser:'Open in browser'},
