@@ -101,9 +101,12 @@ h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;animation:fade 
   function reveal(){if(shown)return;shown=true;loaded=true;clearTimeout(slowT);
     /* Show the splash for at least 0.9 s so it never flashes. */
     setTimeout(function(){
-      /* Tell the app the splash is lifting so its card flip plays in view, then fade. */
-      try{frame.contentWindow.postMessage({shiShown:1},'*')}catch(e){}
-      setTimeout(function(){splash.classList.remove('slow','off');splash.classList.add('gone')},140)},Math.max(0,900-(Date.now()-t0)))}
+      /* The app page flips in as the splash lifts, so the flip is seen (it cannot play behind the splash). */
+      var still=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+      if(!still&&frame.animate){
+        frame.style.transformOrigin='50% 50%';
+        frame.animate([{transform:'perspective(1100px) rotateY(-80deg)',opacity:.15},{transform:'perspective(1100px) rotateY(0deg)',opacity:1}],{duration:520,easing:'cubic-bezier(.2,.7,.2,1)'})}
+      splash.classList.remove('slow','off');splash.classList.add('gone')},Math.max(0,900-(Date.now()-t0)))}
   frame.addEventListener('load',function(){clearTimeout(slowT);setTimeout(reveal,4000)});
   retry.addEventListener('click',load);
   window.addEventListener('online',function(){if(!loaded)load()});
