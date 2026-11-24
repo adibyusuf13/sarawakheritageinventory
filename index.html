@@ -78,7 +78,7 @@ h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;animation:fade 
     if(d.shiDev==='get'){var v='';try{v=localStorage.getItem('shi_dev_top')||''}catch(x){}
       if(!/^[0-9a-f]{32}$/.test(v)){var a=new Uint8Array(16);(window.crypto||{}).getRandomValues&&crypto.getRandomValues(a);v=Array.prototype.map.call(a,function(b){return('0'+b.toString(16)).slice(-2)}).join('');try{localStorage.setItem('shi_dev_top',v)}catch(x){}}
       try{e.source.postMessage({shiDev:v},e.origin)}catch(x){}}
-    else if(d.shiReady&&pending){try{e.source.postMessage({shiGo:pending.go,shiUser:pending.user},e.origin)}catch(x){}pending=null}
+    else if(d.shiReady){if(pending){try{e.source.postMessage({shiGo:pending.go,shiUser:pending.user},e.origin)}catch(x){}pending=null}setTimeout(reveal,250)}
   });
   var TXT={
    en:{load:'Opening the inventory…',slow:'Still loading.',slowSub:'This can take a moment on a slow connection. You can keep waiting, try again, or open the app in your browser.',off:'You are offline.',offSub:'Connect to Wi-Fi or mobile data, then try again.',retry:'Try again',browser:'Open in browser'},
@@ -90,16 +90,18 @@ h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;animation:fade 
     else if(k=='off'){splash.classList.add('off');msg.textContent=t.off;sub.textContent=t.offSub}
     else msg.textContent=t.load;
     retry.textContent=t.retry;openA.textContent=t.browser}
-  function load(){loaded=false;splash.classList.remove('gone');t0=Date.now();clearTimeout(slowT);
+  function load(){loaded=false;shown=false;splash.classList.remove('gone');t0=Date.now();clearTimeout(slowT);
     if(navigator.onLine===false){state('off');return}
     state('load');
     /* A retry replaces the frame address so it adds no history entries. */
     if(!frame.getAttribute('src'))frame.src=APP;else{try{frame.contentWindow.location.replace(APP)}catch(x){frame.src=APP}}
     slowT=setTimeout(function(){if(!loaded)state('slow')},12000)}
-  frame.addEventListener('load',function(){
-    loaded=true;clearTimeout(slowT);
+  /* The splash stays until the app says it has drawn its first screen (or 4 s after the page loads), so there is never a blank flash between them. */
+  var shown=false;
+  function reveal(){if(shown)return;shown=true;loaded=true;clearTimeout(slowT);
     /* Show the splash for at least 0.9 s so it never flashes. */
-    setTimeout(function(){splash.classList.remove('slow','off');splash.classList.add('gone')},Math.max(0,900-(Date.now()-t0)))});
+    setTimeout(function(){splash.classList.remove('slow','off');splash.classList.add('gone')},Math.max(0,900-(Date.now()-t0)))}
+  frame.addEventListener('load',function(){clearTimeout(slowT);setTimeout(reveal,4000)});
   retry.addEventListener('click',load);
   window.addEventListener('online',function(){if(!loaded)load()});
   window.addEventListener('offline',function(){if(!loaded){clearTimeout(slowT);state('off')}});
