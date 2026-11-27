@@ -15,7 +15,7 @@
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="manifest" href="manifest.webmanifest">
 <script>
-(function(){var m="";try{m=localStorage.getItem("shi_lt")||""}catch(e){}if(m!="dark"&&m!="light")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";if(m=="light")document.documentElement.className+=" lt"})();
+(function(){var m="";try{m=localStorage.getItem("shi_lp")||""}catch(e){}if(m!="dark"&&m!="light")m=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";if(m=="light")document.documentElement.className+=" lt"})();
 /* Launcher only: this page shows the splash screen and opens the app full screen in the same window. ?direct opens the Apps Script page itself. */
 (function(){if(/[?&]direct\b/.test(location.search))location.replace('https://script.google.com/macros/s/AKfycbx1VfjwT4hq_0V9Vl3KozkIWdCy2XC8H7LgF75hMNcMQlep2bg4EsKyIzcmY5bUT1fZ/exec')})();
 </script>
@@ -176,8 +176,10 @@ h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;opacity:0;anima
     if(d.shiDev==='get'){var v='';try{v=localStorage.getItem('shi_dev_top')||''}catch(x){}
       if(!/^[0-9a-f]{32}$/.test(v)){var a=new Uint8Array(16);(window.crypto||{}).getRandomValues&&crypto.getRandomValues(a);v=Array.prototype.map.call(a,function(b){return('0'+b.toString(16)).slice(-2)}).join('');try{localStorage.setItem('shi_dev_top',v)}catch(x){}}
       try{e.source.postMessage({shiDev:v},e.origin)}catch(x){}}
-    else if(d.shiTheme==='dark'||d.shiTheme==='light'){try{localStorage.setItem('shi_lt',d.shiTheme)}catch(x){}if(window.__applyLt)window.__applyLt(d.shiTheme)}
-    else if(d.shiReady){if(pending){try{e.source.postMessage({shiGo:pending.go,shiUser:pending.user},e.origin)}catch(x){}pending=null}setTimeout(reveal,250)}
+    else if(d.shiTheme==='dark'||d.shiTheme==='light'){var okp=d.shiPref==='light'||d.shiPref==='dark'||d.shiPref==='system',cur='';try{cur=localStorage.getItem('shi_lp')||''}catch(x){}
+      if(okp&&(d.shiSet||!cur)){try{localStorage.setItem('shi_lp',d.shiPref)}catch(x){}}
+      if(window.__applyLt&&(d.shiSet||cur!=='light'&&cur!=='dark'))window.__applyLt(d.shiTheme)}
+    else if(d.shiReady){if(pending){var lp='';try{lp=localStorage.getItem('shi_lp')||''}catch(x){}if(lp!=='light'&&lp!=='dark'&&lp!=='system')lp='';try{e.source.postMessage({shiGo:pending.go,shiUser:pending.user,shiLt:lp},e.origin)}catch(x){}pending=null}setTimeout(reveal,250)}
   });
   var TXT={
    en:{load:'Preparing your heritage inventory…',slow:'Still loading.',slowSub:'This can take a moment on a slow connection. You can keep waiting, try again, or open the app in your browser.',off:'You are offline.',offSub:'Connect to Wi-Fi or mobile data, then try again.',retry:'Try again',browser:'Open in browser'},
