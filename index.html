@@ -176,7 +176,7 @@ h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;opacity:0;anima
     if(d.shiDev==='get'){var v='';try{v=localStorage.getItem('shi_dev_top')||''}catch(x){}
       if(!/^[0-9a-f]{32}$/.test(v)){var a=new Uint8Array(16);(window.crypto||{}).getRandomValues&&crypto.getRandomValues(a);v=Array.prototype.map.call(a,function(b){return('0'+b.toString(16)).slice(-2)}).join('');try{localStorage.setItem('shi_dev_top',v)}catch(x){}}
       try{e.source.postMessage({shiDev:v},e.origin)}catch(x){}}
-    else if(d.shiTheme==='dark'||d.shiTheme==='light'){try{localStorage.setItem('shi_lt',d.shiTheme)}catch(x){}}
+    else if(d.shiTheme==='dark'||d.shiTheme==='light'){try{localStorage.setItem('shi_lt',d.shiTheme)}catch(x){}if(window.__applyLt)window.__applyLt(d.shiTheme)}
     else if(d.shiReady){if(pending){try{e.source.postMessage({shiGo:pending.go,shiUser:pending.user},e.origin)}catch(x){}pending=null}setTimeout(reveal,250)}
   });
   var TXT={
@@ -193,9 +193,13 @@ h1{margin:0;font:700 25px/1.2 var(--serif);letter-spacing:-.01em;opacity:0;anima
     function loop(){if(!run)return;var n=performance.now()/1000,dt=Math.min(.05,n-last);last=n;if(!still)T+=dt;draw(T);if(!still)raf=requestAnimationFrame(loop)}
     window.addEventListener('resize',size);loop();
     return function(){run=false;cancelAnimationFrame(raf);window.removeEventListener('resize',size)}}
-  function startSky(){var light=/(^| )lt( |$)/.test(document.documentElement.className);
+  function startSky(){var old=document.getElementById('sky');if(old){var nc=document.createElement('canvas');nc.id='sky';nc.setAttribute('aria-hidden','true');old.parentNode.replaceChild(nc,old);sky=nc}
+    var light=/(^| )lt( |$)/.test(document.documentElement.className);
     try{if(light)skyStop=canopy(sky);else if(window.Starfield){var sf=Starfield.start(sky,{count:matchMedia('(max-width:700px)').matches?1800:3600,still:still});if(sf)skyStop=function(){sf.stop()}}}catch(e){}}
+  window.__applyLt=function(m){applyLt(m)};
   startSky();
+  /* The app reports the theme it opened in. If the loading screen guessed differently (first visit, or the theme was changed elsewhere), switch to it now so there is no dark/light jump at the sign-in page. */
+  function applyLt(m){var cl=document.documentElement.className.replace(/(^| )lt( |$)/,' ').replace(/\s+$/,'');if(m=='light')cl+=' lt';var changed=(m=='light')!==/(^| )lt( |$)/.test(document.documentElement.className);document.documentElement.className=cl;if(changed){if(skyStop){try{skyStop()}catch(x){}skyStop=null}if(!splash.classList.contains('gone'))startSky()}}
   /* Stop drawing once the app is showing. */
   var obs=new MutationObserver(function(){if(splash.classList.contains('gone')){setTimeout(function(){if(skyStop&&splash.classList.contains('gone')){skyStop();skyStop=null}},700)}else if(!skyStop){startSky()}});
   obs.observe(splash,{attributes:true,attributeFilter:['class']});
